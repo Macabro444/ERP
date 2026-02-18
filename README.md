@@ -1,4 +1,5 @@
 # ERP
+<<<<<<< HEAD
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.16.
 
@@ -57,3 +58,6 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+=======
+Seguridad Des. Aplic. Emmanuel Martínez Hernández
+>>>>>>> 943ae054048a4a267b1e5c89a0dfbfc1d9199196
