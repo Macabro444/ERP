@@ -1,0 +1,14 @@
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center;">
+  <div style="width:350px; display:flex; flex-direction:column; gap:1rem; padding:2rem; border:1px solid #ddd; border-radius:12px;">
+    <h2 style="text-align:center;">Iniciar Sesión</h2>
+
+    <input pInputText [(ngModel)]="email" placeholder="Correo electrónico" style="width:100%" />
+    <input pInputText type="password" [(ngModel)]="password" placeholder="Contraseña" style="width:100%" />
+
+    <div style="width:100%">
+  <p-button label="Entrar" styleClass="w-full" />
+  <p-button label="Regresar" icon="" severity="secondary" routerLink="/" />
+</div>
+    <p style="text-align:center;">¿No tienes cuenta? <a routerLink="/register">Regístrate</a></p>
+  </div>
+</div>

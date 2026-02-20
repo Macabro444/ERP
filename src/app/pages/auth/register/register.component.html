@@ -1,0 +1,18 @@
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center;">
+  <div style="width:350px; display:flex; flex-direction:column; gap:1rem; padding:2rem; border:1px solid #ddd; border-radius:12px;">
+    <h2 style="text-align:center;">El registro</h2>
+
+    <input pInputText [(ngModel)]="nombre" placeholder="Nombre completo" style="width:100%" />
+    <input pInputText [(ngModel)]="email" placeholder="Correo electrónico" style="width:100%" />
+    <input pInputText type="password" [(ngModel)]="password" placeholder="Contraseña" style="width:100%" />
+
+    <div style="width:100%">
+  <p-button label="Registrarse" severity="primary" styleClass="w-full" />
+</div>
+
+  <div>
+  <p-button label="Regresar" icon="" severity="secondary" routerLink="/" />
+</div>
+    <p style="text-align:center;">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+  </div>
+</div>
