@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { Permissions } from './permissions';
+import { Grupos } from './grupos';
 
-describe('Permissions', () => {
-  let service: Permissions;
+describe('Grupos', () => {
+  let service: Grupos;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Permissions);
+    service = TestBed.inject(Grupos);
   });
 
   it('should be created', () => {

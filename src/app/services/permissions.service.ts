@@ -11,6 +11,8 @@ export class PermissionsService {
     'usuario.view',
     'usuario.editar',
     // 'usuario.eliminar', //
+    'tickets.view',
+    'tickets.crear',
   ]);
 
   hasPermission(permiso: string): boolean {

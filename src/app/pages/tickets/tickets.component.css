@@ -1,0 +1,45 @@
+.page { padding: 1.5rem; }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.detalle-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.detalle-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+}
+
+.comentario {
+  background: #f8fafc;
+  border-left: 3px solid #3b82f6;
+  padding: 0.75rem;
+  border-radius: 0 8px 8px 0;
+}
+
+.comentario-autor { font-weight: bold; margin-right: 0.5rem; }
+.comentario-fecha { font-size: 0.75rem; color: #94a3b8; }
+.comentario p { margin: 0.3rem 0 0; }
+
+.historial-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.historial-fecha {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
