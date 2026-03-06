@@ -40,12 +40,14 @@
   <div class="controles">
     <div class="filtros">
       <p-select
-        [options]="grupos"
-        [ngModel]="grupoSeleccionado()"
-        (ngModelChange)="seleccionarGrupo($event)"
-        placeholder="Filtrar por grupo"
-        style="width: 160px"
-      />
+  [options]="grupos"
+  [ngModel]="grupoSeleccionado()"
+  (ngModelChange)="seleccionarGrupo($event)"
+  placeholder="Filtrar por grupo"
+  style="width:160px" />
+<span style="font-size:0.78rem; color:#94a3b8;">
+  Selecciona un grupo para ir a su vista
+</span>
 
       @if (!vistaKanban()) {
         <p-select

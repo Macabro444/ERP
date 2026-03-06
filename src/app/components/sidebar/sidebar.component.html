@@ -4,7 +4,6 @@
   </div>
 
   <nav class="sidebar-nav">
-
     <ng-container *ifHasPermission="'dashboard.view'">
       <a routerLink="/app/dashboard" routerLinkActive="active">
         <i class="pi pi-home"></i> Inicio
@@ -12,16 +11,13 @@
     </ng-container>
 
     <ng-container *ifHasPermission="'tickets.view'">
-  <a routerLink="/app/tickets" routerLinkActive="active">
-    <i class="pi pi-ticket"></i> Tickets
-  </a>
-</ng-container>
-
+      <a routerLink="/app/tickets" routerLinkActive="active">
+        <i class="pi pi-ticket"></i> Tickets
+      </a>
+    </ng-container>
 
     <ng-container *ifHasPermission="'grupos.view'">
-      <a routerLink="/app/grupos" routerLinkActive="active">
-        <i class="pi pi-users"></i> Grupos
-      </a>
+      <a routerLink="/app/grupos" routerLinkActive="active"> <i class="pi pi-users"></i> Grupos </a>
     </ng-container>
 
     <ng-container *ifHasPermission="'usuario.view'">
@@ -29,13 +25,10 @@
         <i class="pi pi-id-card"></i> Perfil
       </a>
     </ng-container>
-
   </nav>
 
   <div class="sidebar-footer">
-    <a routerLink="/">
-      <i class="pi pi-sign-out"></i> Cerrar sesión
-    </a>
+    <a routerLink="/"> <i class="pi pi-sign-out"></i> Cerrar sesión </a>
     <span class="version">v1.0.0</span>
   </div>
 </div>

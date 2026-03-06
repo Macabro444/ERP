@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -8,53 +8,117 @@ import { InputTextModule } from 'primeng/inputtext';
 import { TagModule } from 'primeng/tag';
 import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { ConfirmationService } from 'primeng/api';
+import { AvatarModule } from 'primeng/avatar';
+import { DividerModule } from 'primeng/divider';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { GrupoStateService } from '../../services/grupo-state';
+
+interface Miembro {
+  id: number;
+  nombre: string;
+  usuario: string;
+  email: string;
+}
 
 interface Grupo {
   id: number;
   nombre: string;
   descripcion: string;
   nivel: string;
-  integrantes: number;
+  miembros: Miembro[];
   tickets: number;
 }
 
 @Component({
   selector: 'app-grupos',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule, TableModule, DialogModule, InputTextModule, TagModule, CardModule, ToastModule, ConfirmDialogModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    TableModule,
+    DialogModule,
+    InputTextModule,
+    TagModule,
+    CardModule,
+    ToastModule,
+    ConfirmDialogModule,
+    AvatarModule,
+    DividerModule,
+  ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './grupos.component.html',
-  styleUrl: './grupos.component.css'
+  styleUrl: './grupos.component.css',
 })
-export class GruposComponent {
+export class GruposComponent implements OnInit {
   grupos: Grupo[] = [
-    { id: 1, nombre: 'Seguridad', descripcion: 'Seguridad en Apps', nivel: 'Avanzado', integrantes: 5, tickets: 2 },
-    { id: 2, nombre: 'Frontend', descripcion: 'Desarrollo UI', nivel: 'Básico', integrantes: 3, tickets: 0 },
+    {
+      id: 1,
+      nombre: 'Departamento TI',
+      descripcion: 'Tecnologías y Innovación',
+      nivel: 'Avanzado',
+      tickets: 2,
+      miembros: [
+        { id: 1, nombre: 'Jorge Trejo', usuario: 'macabro444', email: 'macabrosss444@gmail.com' },
+        { id: 2, nombre: 'Moises Lozano', usuario: 'Moiloz', email: 'moiloz@gmail.com' },
+      ],
+    },
+    {
+      id: 2,
+      nombre: 'Servicios Escolares',
+      descripcion: 'Avisos',
+      nivel: 'Básico',
+      tickets: 1,
+      miembros: [
+        { id: 1, nombre: 'Valeria Gonzalez', usuario: 'GonzVal', email: 'Valegonzzz@gmail.com' },
+      ],
+    },
   ];
 
-  dialogVisible = false;
+  usuariosDisponibles: Miembro[] = [
+    { id: 3, nombre: 'Tito Billalobos', usuario: 'Tibb', email: 'titodoublep@gmail.com' },
+    { id: 4, nombre: 'Emmanuel Martinez', usuario: 'EmmaM', email: 'emmamar@gmail.com' },
+    { id: 5, nombre: 'Jose Delgadillo', usuario: 'ElDelga', email: 'delgaaa@gmail.com' },
+  ];
+
+  dialogGrupo = false;
+  dialogMiembros = false;
   esEdicion = false;
   grupoActual: Grupo = this.grupoVacio();
+  grupoDetalle: Grupo | null = null;
+  busquedaMiembro = '';
+  grupoFiltrado: number | null = null;
 
-  constructor(private msg: MessageService, private confirm: ConfirmationService) {}
+  constructor(
+    private msg: MessageService,
+    private confirm: ConfirmationService,
+    private grupoState: GrupoStateService,
+  ) {}
+
+  ngOnInit() {
+    this.grupoFiltrado = this.grupoState.grupoSeleccionado();
+    if (this.grupoFiltrado !== null) {
+      const grupo = this.grupos.find((g) => g.id === this.grupoFiltrado);
+      if (grupo) this.verMiembros(grupo);
+      this.grupoState.grupoSeleccionado.set(null);
+    }
+  }
 
   grupoVacio(): Grupo {
-    return { id: 0, nombre: '', descripcion: '', nivel: '', integrantes: 0, tickets: 0 };
+    return { id: 0, nombre: '', descripcion: '', nivel: '', miembros: [], tickets: 0 };
   }
 
   abrirNuevo() {
     this.grupoActual = this.grupoVacio();
     this.esEdicion = false;
-    this.dialogVisible = true;
+    this.dialogGrupo = true;
   }
 
   editar(grupo: Grupo) {
-    this.grupoActual = { ...grupo };
+    this.grupoActual = { ...grupo, miembros: [...grupo.miembros] };
     this.esEdicion = true;
-    this.dialogVisible = true;
+    this.dialogGrupo = true;
   }
 
   guardar() {
@@ -63,26 +127,77 @@ export class GruposComponent {
       return;
     }
     if (this.esEdicion) {
-      const i = this.grupos.findIndex(g => g.id === this.grupoActual.id);
+      const i = this.grupos.findIndex((g) => g.id === this.grupoActual.id);
       this.grupos[i] = { ...this.grupoActual };
-      this.msg.add({ severity: 'success', summary: 'Actualizado', detail: 'Grupo actualizado correctamente' });
+      this.msg.add({ severity: 'success', summary: 'Actualizado', detail: 'Grupo actualizado' });
     } else {
       this.grupoActual.id = this.grupos.length + 1;
       this.grupos = [...this.grupos, { ...this.grupoActual }];
-      this.msg.add({ severity: 'success', summary: 'Creado', detail: 'Grupo creado correctamente' });
+      this.msg.add({ severity: 'success', summary: 'Creado', detail: 'Grupo creado' });
     }
-    this.dialogVisible = false;
+    this.dialogGrupo = false;
   }
 
-  eliminar(grupo: Grupo) {
+  eliminarGrupo(grupo: Grupo) {
     this.confirm.confirm({
-      message: `¿Deseas eliminar el grupo "${grupo.nombre}"?`,
-      header: 'Confirmar eliminación',
+      message: `¿Eliminar el grupo "${grupo.nombre}"?`,
+      header: 'Confirmar',
       icon: 'pi pi-trash',
       accept: () => {
-        this.grupos = this.grupos.filter(g => g.id !== grupo.id);
+        this.grupos = this.grupos.filter((g) => g.id !== grupo.id);
         this.msg.add({ severity: 'warn', summary: 'Eliminado', detail: 'Grupo eliminado' });
-      }
+      },
+    });
+  }
+
+  verMiembros(grupo: Grupo) {
+    this.grupoDetalle = grupo;
+    this.busquedaMiembro = '';
+    this.dialogMiembros = true;
+  }
+
+  get usuariosFiltrados(): Miembro[] {
+    if (!this.busquedaMiembro) return this.usuariosDisponibles;
+    const b = this.busquedaMiembro.toLowerCase();
+    return this.usuariosDisponibles.filter(
+      (u) =>
+        u.nombre.toLowerCase().includes(b) ||
+        u.usuario.toLowerCase().includes(b) ||
+        u.email.toLowerCase().includes(b),
+    );
+  }
+
+  esMiembro(usuario: Miembro): boolean {
+    return this.grupoDetalle?.miembros.some((m) => m.id === usuario.id) ?? false;
+  }
+
+  agregarMiembro(usuario: Miembro) {
+    if (!this.grupoDetalle) return;
+    if (this.esMiembro(usuario)) return;
+    this.grupoDetalle.miembros = [...this.grupoDetalle.miembros, usuario];
+    this.msg.add({
+      severity: 'success',
+      summary: 'Agregado',
+      detail: `${usuario.nombre} agregado al grupo`,
+    });
+  }
+
+  eliminarMiembro(miembro: Miembro) {
+    if (!this.grupoDetalle) return;
+    this.confirm.confirm({
+      message: `¿Eliminar a "${miembro.nombre}" del grupo?`,
+      header: 'Confirmar',
+      icon: 'pi pi-user-minus',
+      accept: () => {
+        this.grupoDetalle!.miembros = this.grupoDetalle!.miembros.filter(
+          (m) => m.id !== miembro.id,
+        );
+        this.msg.add({
+          severity: 'warn',
+          summary: 'Eliminado',
+          detail: `${miembro.nombre} eliminado del grupo`,
+        });
+      },
     });
   }
 }

@@ -11,17 +11,27 @@ import { TooltipModule } from 'primeng/tooltip';
 import { HasPermissionDirective } from '../../directives/has-permission.directive';
 import { TicketsService, Ticket } from '../../services/tickets.service';
 import { AvatarModule } from 'primeng/avatar';
+import { Router } from '@angular/router';
+import { GrupoStateService } from '../../services/grupo-state';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ButtonModule, CardModule,
-    TagModule, SelectModule, ToggleSwitchModule, TableModule,
-    TooltipModule, HasPermissionDirective,  AvatarModule
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    CardModule,
+    TagModule,
+    SelectModule,
+    ToggleSwitchModule,
+    TableModule,
+    TooltipModule,
+    HasPermissionDirective,
+    AvatarModule,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent {
   vistaKanban = signal(false);
@@ -68,19 +78,23 @@ export class DashboardComponent {
     { estado: 'finalizado', label: 'Finalizado', color: '#10b981' },
   ];
 
-  constructor(public ticketsService: TicketsService) {}
+  constructor(
+    public ticketsService: TicketsService,
+    private router: Router,
+    private grupoState: GrupoStateService,
+  ) {}
 
   get ticketsFiltrados(): Ticket[] {
     let lista = this.ticketsService.tickets();
 
     if (this.grupoSeleccionado() !== null) {
-      lista = lista.filter(t => t.grupoId === this.grupoSeleccionado());
+      lista = lista.filter((t) => t.grupoId === this.grupoSeleccionado());
     }
     if (this.filtroEstado) {
-      lista = lista.filter(t => t.estado === this.filtroEstado);
+      lista = lista.filter((t) => t.estado === this.filtroEstado);
     }
     if (this.filtroPrioridad) {
-      lista = lista.filter(t => t.prioridad === this.filtroPrioridad);
+      lista = lista.filter((t) => t.prioridad === this.filtroPrioridad);
     }
     if (this.filtroOrden === 'fc') {
       lista = [...lista].sort((a, b) => a.fechaCreacion.localeCompare(b.fechaCreacion));
@@ -97,37 +111,45 @@ export class DashboardComponent {
   }
 
   ticketsPorEstado(estado: string): Ticket[] {
-    return this.ticketsFiltrados.filter(t => t.estado === estado);
+    return this.ticketsFiltrados.filter((t) => t.estado === estado);
   }
 
   get stats() {
     const todos = this.ticketsService.tickets();
     return {
       total: todos.length,
-      pendiente: todos.filter(t => t.estado === 'pendiente').length,
-      enProgreso: todos.filter(t => t.estado === 'en-progreso').length,
-      revision: todos.filter(t => t.estado === 'revision').length,
-      finalizado: todos.filter(t => t.estado === 'finalizado').length,
+      pendiente: todos.filter((t) => t.estado === 'pendiente').length,
+      enProgreso: todos.filter((t) => t.estado === 'en-progreso').length,
+      revision: todos.filter((t) => t.estado === 'revision').length,
+      finalizado: todos.filter((t) => t.estado === 'finalizado').length,
     };
   }
 
   severidadEstado(estado: string) {
     const map: any = {
-      'pendiente': 'warn', 'en-progreso': 'info',
-      'revision': 'secondary', 'finalizado': 'success'
+      pendiente: 'warn',
+      'en-progreso': 'info',
+      revision: 'secondary',
+      finalizado: 'success',
     };
     return map[estado] || 'info';
   }
 
   severidadPrioridad(prioridad: string) {
     const map: any = {
-      'baja': 'secondary', 'media': 'info',
-      'alta': 'warn', 'critica': 'danger'
+      baja: 'secondary',
+      media: 'info',
+      alta: 'warn',
+      critica: 'danger',
     };
     return map[prioridad] || 'info';
   }
 
   seleccionarGrupo(valor: number | null) {
     this.grupoSeleccionado.set(valor);
+    this.grupoState.grupoSeleccionado.set(valor);
+    if (valor !== null) {
+      this.router.navigate(['/app/grupos']);
+    }
   }
 }
