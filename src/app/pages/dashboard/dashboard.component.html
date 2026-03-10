@@ -49,34 +49,32 @@
   Selecciona un grupo para ir a su vista
 </span>
 
-      @if (!vistaKanban()) {
-        <p-select
-          [(ngModel)]="filtroEstado"
-          [options]="estadoOpciones"
-          placeholder="Estado"
-          style="width: 140px"
-        />
-        <p-select
-          [(ngModel)]="filtroPrioridad"
-          [options]="prioridadOpciones"
-          placeholder="Prioridad"
-          style="width: 130px"
-        />
-        <p-select
-          [(ngModel)]="filtroOrden"
-          [options]="ordenOpciones"
-          placeholder="Ordenar"
-          style="width: 150px"
-        />
-      }
-    </div>
-
-    <div class="toggle-vista">
-      <span [class.activo]="!vistaKanban()"> <i class="pi pi-list"></i> Lista </span>
-      <p-toggleswitch [(ngModel)]="vistaKanban" />
-      <span [class.activo]="vistaKanban()"> <i class="pi pi-table"></i> Kanban </span>
+      <div [style.visibility]="vistaKanban() ? 'hidden' : 'visible'"
+         style="display:flex; gap:0.5rem; align-items:center;">
+      <p-select
+        [(ngModel)]="filtroEstado"
+        [options]="estadoOpciones"
+        placeholder="Estado"
+        style="width:140px" />
+      <p-select
+        [(ngModel)]="filtroPrioridad"
+        [options]="prioridadOpciones"
+        placeholder="Prioridad"
+        style="width:130px" />
+      <p-select
+        [(ngModel)]="filtroOrden"
+        [options]="ordenOpciones"
+        placeholder="Ordenar"
+        style="width:150px" />
     </div>
   </div>
+
+  <div class="toggle-vista">
+    <span [class.activo]="!vistaKanban()"><i class="pi pi-list"></i> Lista</span>
+    <p-toggleswitch [(ngModel)]="vistaKanban" />
+    <span [class.activo]="vistaKanban()"><i class="pi pi-table"></i> Kanban</span>
+  </div>
+</div>
 
   @if (!vistaKanban()) {
     <p-table

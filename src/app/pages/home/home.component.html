@@ -1,7 +1,75 @@
-<div style="min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1.5rem;">
-  <h1>HOME ERP</h1>
-  <div style="display:flex; gap:1rem;">
-    <p-button label="Iniciar Sesión" icon="" routerLink="/login" />
-    <p-button label="Registrarse" icon="" severity="secondary" routerLink="/register" />
-  </div>
+<div class="home">
+  <nav class="navbar">
+    <span class="navbar-brand"> <i class="pi pi-box"></i> ERP Vajo </span>
+    <div class="navbar-links">
+      <a routerLink="/login">Iniciar sesión</a>
+      <a routerLink="/register" class="btn-register">Registrarse</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1>En vajo todo esta bajo control<br /><span class="hero-highlight">de forma fast</span></h1>
+      <p>
+        El Sistema es completo con gestión de tickets, grupos, usuarios y permisos personalizados.
+      </p>
+      <div class="hero-buttons">
+        <a routerLink="/login" class="btn-primary">
+          <i class="pi pi-sign-in"></i> Iniciar sesión
+        </a>
+        <a routerLink="/register" class="btn-secondary">
+          <i class="pi pi-user-plus"></i> Crear cuenta
+        </a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <div class="hero-card">
+        <div class="hero-card-header"><i class="pi pi-ticket"></i> Tickets activos</div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="hero-stat-num" style="color: #f59e0b">3</span>
+            <span>Pendientes</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-num" style="color: #3b82f6">2</span>
+            <span>En progreso</span>
+          </div>
+          <div class="hero-stat">
+            <span class="hero-stat-num" style="color: #10b981">5</span>
+            <span>Finalizados</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features">
+    <h2>Todo lo que necesitas</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <i class="pi pi-ticket feature-icon" style="color: #3b82f6"></i>
+        <h3>Gestión de Tickets</h3>
+        <p>Crea, asigna y da seguimiento a tickets con historial de cambios y comentarios.</p>
+      </div>
+      <div class="feature-card">
+        <i class="pi pi-users feature-icon" style="color: #8b5cf6"></i>
+        <h3>Grupos y Equipos</h3>
+        <p>Organiza usuarios en grupos, agrega o elimina miembros fácilmente.</p>
+      </div>
+      <div class="feature-card">
+        <i class="pi pi-shield feature-icon" style="color: #10b981"></i>
+        <h3>Sistema de Permisos</h3>
+        <p>Controla el acceso mediante permisos personalizados por usuario.</p>
+      </div>
+      <div class="feature-card">
+        <i class="pi pi-chart-bar feature-icon" style="color: #f59e0b"></i>
+        <h3>Dashboard y Kanban</h3>
+        <p>Visualiza estadísticas y gestiona tickets en vista lista o tablero Kanban.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>© 2026 ERP System — Desarrollado con Angular 20 + PrimeNG</span>
+  </footer>
 </div>
