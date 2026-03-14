@@ -115,7 +115,7 @@ export class TicketsService {
   }
 
   actualizar(ticket: Ticket) {
-    this._tickets.update((ts) => ts.map((t) => (t.id === ticket.id ? ticket : t)));
+    this.tickets.update((lista) => lista.map((t) => (t.id === ticket.id ? { ...ticket } : t)));
   }
 
   eliminar(id: number) {

@@ -2,10 +2,10 @@
 <p-confirmDialog />
 
 <div class="page">
-
   <div class="page-header">
-    <h2><i class="pi pi-users"></i> Grupos</h2>
-    <p-button label="Nuevo Grupo" icon="pi pi-plus" severity="success" (onClick)="abrirNuevo()" />
+    <ng-container *ifHasPermission="'grupos.crear'">
+  <p-button label="Nuevo Grupo" icon="pi pi-plus" severity="success" (onClick)="abrirNuevo()" />
+</ng-container>
   </div>
 
   <div class="total-card">
@@ -16,7 +16,13 @@
     <i class="pi pi-users total-icon"></i>
   </div>
 
-  <p-table [value]="grupos" [paginator]="true" [rows]="5" styleClass="p-datatable-striped p-datatable-gridlines">
+  <p-table
+    [value]="grupos"
+    dataKey="id"
+    [paginator]="true"
+    [rows]="5"
+    styleClass="p-datatable-striped p-datatable-gridlines"
+  >
     <ng-template pTemplate="header">
       <tr>
         <th>Nombre</th>
@@ -29,40 +35,95 @@
     </ng-template>
     <ng-template pTemplate="body" let-grupo>
       <tr>
-        <td><strong>{{ grupo.nombre }}</strong></td>
+        <td>
+          <strong>{{ grupo.nombre }}</strong>
+        </td>
         <td>{{ grupo.descripcion }}</td>
         <td><p-tag [value]="grupo.nivel" severity="info" /></td>
         <td>
-          <div style="display:flex; align-items:center; gap:0.5rem;">
-            <div style="display:flex;">
-              @for (m of grupo.miembros.slice(0,3); track m.id) {
-                <p-avatar [label]="m.nombre[0].toUpperCase()" shape="circle" size="normal"
-                  style="margin-left:-6px; border:2px solid white;" />
+          <div style="display: flex; align-items: center; gap: 0.5rem">
+            <div style="display: flex">
+              @for (m of grupo.miembros.slice(0, 3); track m.id) {
+                <p-avatar
+                  [label]="m.nombre[0].toUpperCase()"
+                  shape="circle"
+                  size="normal"
+                  style="margin-left: -6px; border: 2px solid white"
+                />
               }
             </div>
-            <span style="font-size:0.85rem; color:#64748b;">{{ grupo.miembros.length }} miembro(s)</span>
+            <span style="font-size: 0.85rem; color: #64748b">
+              {{ grupo.miembros.length }} miembro(s)
+            </span>
           </div>
         </td>
         <td>{{ grupo.tickets }}</td>
         <td>
-          <div style="display:flex; gap:0.5rem;">
-            <p-button icon="pi pi-users" severity="info" pTooltip="Ver miembros" (onClick)="verMiembros(grupo)" />
-            <p-button icon="pi pi-pencil" severity="info" pTooltip="Editar" (onClick)="editar(grupo)" />
-            <p-button icon="pi pi-trash" severity="danger" pTooltip="Eliminar" (onClick)="eliminarGrupo(grupo)" />
+          <div style="display: flex; gap: 0.5rem">
+            <ng-container *ifHasPermission="'tickets.crear'">
+  <p-button
+    icon="pi pi-ticket"
+    severity="success"
+    pTooltip="Nuevo Ticket"
+    (onClick)="abrirCrearTicket(grupo)"
+  />
+</ng-container>
+            <p-button
+              icon="pi pi-users"
+              severity="info"
+              pTooltip="Ver miembros"
+              (onClick)="verMiembros(grupo)"
+            />
+
+            <ng-container *ifHasPermission="'grupos.editar'">
+              <p-button
+                icon="pi pi-pencil"
+                severity="info"
+                pTooltip="Editar"
+                (onClick)="editar(grupo)"
+              />
+            </ng-container>
+
+            <ng-container *ifHasPermission="'grupos.eliminar'">
+              <p-button
+                icon="pi pi-trash"
+                severity="danger"
+                pTooltip="Eliminar"
+                (onClick)="eliminarGrupo(grupo)"
+              />
+            </ng-container>
           </div>
         </td>
       </tr>
     </ng-template>
   </p-table>
-
 </div>
 
-<p-dialog [(visible)]="dialogGrupo" [header]="esEdicion ? 'Editar Grupo' : 'Nuevo Grupo'"
-  [modal]="true" [style]="{width:'400px'}">
-  <div style="display:flex; flex-direction:column; gap:1rem; padding:0.5rem 0;">
-    <input pInputText [(ngModel)]="grupoActual.nombre" placeholder="Nombre del grupo" style="width:100%" />
-    <input pInputText [(ngModel)]="grupoActual.descripcion" placeholder="Descripción" style="width:100%" />
-    <input pInputText [(ngModel)]="grupoActual.nivel" placeholder="Nivel (Básico, Avanzado...)" style="width:100%" />
+<p-dialog
+  [(visible)]="dialogGrupo"
+  [header]="esEdicion ? 'Editar Grupo' : 'Nuevo Grupo'"
+  [modal]="true"
+  [style]="{ width: '400px' }"
+>
+  <div style="display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem 0">
+    <input
+      pInputText
+      [(ngModel)]="grupoActual.nombre"
+      placeholder="Nombre del grupo"
+      style="width: 100%"
+    />
+    <input
+      pInputText
+      [(ngModel)]="grupoActual.descripcion"
+      placeholder="Descripción"
+      style="width: 100%"
+    />
+    <input
+      pInputText
+      [(ngModel)]="grupoActual.nivel"
+      placeholder="Nivel (Básico, Avanzado...)"
+      style="width: 100%"
+    />
   </div>
   <ng-template pTemplate="footer">
     <p-button label="Cancelar" severity="secondary" (onClick)="dialogGrupo = false" />
@@ -70,51 +131,116 @@
   </ng-template>
 </p-dialog>
 
-<p-dialog [(visible)]="dialogMiembros" [header]="'Miembros — ' + grupoDetalle?.nombre"
-  [modal]="true" [style]="{width:'520px'}">
-
+<p-dialog
+  [(visible)]="dialogMiembros"
+  [header]="'Miembros — ' + grupoDetalle?.nombre"
+  [modal]="true"
+  [style]="{ width: '520px' }"
+>
   @if (grupoDetalle) {
-    <div style="display:flex; flex-direction:column; gap:1rem;">
-
-      <h4 style="margin:0;"><i class="pi pi-users"></i> Miembros actuales</h4>
+    <div style="display: flex; flex-direction: column; gap: 1rem">
+      <h4 style="margin: 0"><i class="pi pi-users"></i> Miembros actuales</h4>
       @for (m of grupoDetalle.miembros; track m.id) {
         <div class="miembro-row">
           <p-avatar [label]="m.nombre[0].toUpperCase()" shape="circle" />
-          <div style="flex:1;">
-            <div style="font-weight:500;">{{ m.nombre }}</div>
-            <div style="font-size:0.8rem; color:#94a3b8;">@{{ m.usuario }} · {{ m.email }}</div>
+          <div style="flex: 1">
+            <div style="font-weight: 500">{{ m.nombre }}</div>
+            <div style="font-size: 0.8rem; color: #94a3b8">@{{ m.usuario }} · {{ m.email }}</div>
           </div>
-          <p-button icon="pi pi-user-minus" severity="danger" size="small"
-            pTooltip="Eliminar del grupo" (onClick)="eliminarMiembro(m)" />
+          <p-button
+            icon="pi pi-user-minus"
+            severity="danger"
+            size="small"
+            pTooltip="Eliminar del grupo"
+            (onClick)="eliminarMiembro(m)"
+          />
         </div>
       }
       @if (grupoDetalle.miembros.length === 0) {
-        <p style="color:#94a3b8;">Sin miembros aún</p>
+        <p style="color: #94a3b8">Sin miembros aún</p>
       }
 
       <p-divider />
 
-      <h4 style="margin:0;"><i class="pi pi-user-plus"></i> Agregar miembro</h4>
-      <input pInputText [(ngModel)]="busquedaMiembro"
-        placeholder="Buscar por nombre, usuario o email..." style="width:100%" />
+      <h4 style="margin: 0"><i class="pi pi-user-plus"></i> Agregar miembro</h4>
+      <input
+        pInputText
+        [(ngModel)]="busquedaMiembro"
+        placeholder="Buscar por nombre, usuario o email..."
+        style="width: 100%"
+      />
 
       @for (u of usuariosFiltrados; track u.id) {
         <div class="miembro-row">
           <p-avatar [label]="u.nombre[0].toUpperCase()" shape="circle" />
-          <div style="flex:1;">
-            <div style="font-weight:500;">{{ u.nombre }}</div>
-            <div style="font-size:0.8rem; color:#94a3b8;">@{{ u.usuario }} · {{ u.email }}</div>
+          <div style="flex: 1">
+            <div style="font-weight: 500">{{ u.nombre }}</div>
+            <div style="font-size: 0.8rem; color: #94a3b8">@{{ u.usuario }} · {{ u.email }}</div>
           </div>
           @if (esMiembro(u)) {
             <p-tag value="Ya es miembro" severity="success" />
           } @else {
-            <p-button icon="pi pi-plus" severity="success" size="small"
-              pTooltip="Agregar al grupo" (onClick)="agregarMiembro(u)" />
+            <p-button
+              icon="pi pi-plus"
+              severity="success"
+              size="small"
+              pTooltip="Agregar al grupo"
+              (onClick)="agregarMiembro(u)"
+            />
           }
         </div>
       }
-
     </div>
   }
+</p-dialog>
 
+<p-dialog
+  [(visible)]="dialogTicket"
+  header="Nuevo Ticket"
+  [modal]="true"
+  [style]="{ width: '480px' }"
+>
+  <div style="display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem 0">
+    <small style="color: #94a3b8">
+      Grupo: <strong>{{ grupoTicket?.nombre }}</strong>
+    </small>
+    <input pInputText [(ngModel)]="nuevoTicket.titulo" placeholder="Título" style="width: 100%" />
+    <textarea
+      pTextarea
+      [(ngModel)]="nuevoTicket.descripcion"
+      placeholder="Descripción"
+      rows="3"
+      style="width: 100%"
+    ></textarea>
+    <p-select
+      [(ngModel)]="nuevoTicket.estado"
+      [options]="estadoOpciones"
+      placeholder="Estado"
+      style="width: 100%"
+    />
+    <p-select
+      [(ngModel)]="nuevoTicket.prioridad"
+      [options]="prioridadOpciones"
+      placeholder="Prioridad"
+      style="width: 100%"
+    />
+    <p-select
+      [(ngModel)]="nuevoTicket.asignadoA"
+      [options]="usuariosOpciones"
+      placeholder="Asignar a..."
+      style="width: 100%"
+    />
+    <label style="color: #64748b; font-size: 0.85rem">Fecha límite</label>
+    <input
+      pInputText
+      type="date"
+      [(ngModel)]="nuevoTicket.fechaLimite"
+      [min]="minFecha"
+      style="width: 100%"
+    />
+  </div>
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" severity="secondary" (onClick)="dialogTicket = false" />
+    <p-button label="Crear Ticket" icon="pi pi-save" (onClick)="crearTicket()" />
+  </ng-template>
 </p-dialog>

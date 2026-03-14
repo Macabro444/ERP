@@ -1,4 +1,3 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -13,6 +12,11 @@ import { AvatarModule } from 'primeng/avatar';
 import { DividerModule } from 'primeng/divider';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { GrupoStateService } from '../../services/grupo-state';
+import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
+import { TicketsService } from '../../services/tickets.service';
+import { SelectModule } from 'primeng/select';
+import { TextareaModule } from 'primeng/textarea';
+import { HasPermissionDirective } from '../../directives/has-permission.directive';
 
 interface Miembro {
   id: number;
@@ -46,6 +50,9 @@ interface Grupo {
     ConfirmDialogModule,
     AvatarModule,
     DividerModule,
+    SelectModule,
+    TextareaModule,
+    HasPermissionDirective,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './grupos.component.html',
@@ -90,10 +97,37 @@ export class GruposComponent implements OnInit {
   busquedaMiembro = '';
   grupoFiltrado: number | null = null;
 
+  dialogTicket = false;
+  grupoTicket: Grupo | null = null;
+  nuevoTicket = this.ticketVacio();
+
+  estadoOpciones = [
+    { label: 'Pendiente', value: 'pendiente' },
+    { label: 'En Progreso', value: 'en-progreso' },
+    { label: 'Revisión', value: 'revision' },
+    { label: 'Finalizado', value: 'finalizado' },
+  ];
+
+  prioridadOpciones = [
+    { label: 'Baja', value: 'baja' },
+    { label: 'Media', value: 'media' },
+    { label: 'Alta', value: 'alta' },
+    { label: 'Crítica', value: 'critica' },
+  ];
+
+  usuariosOpciones = [
+    { label: 'Macabro444', value: 'Jorge Trejo' },
+    { label: 'MoiLoz', value: 'Moises Lozano' },
+    { label: 'Sin asignar', value: '' },
+  ];
+
   constructor(
     private msg: MessageService,
     private confirm: ConfirmationService,
     private grupoState: GrupoStateService,
+    private cdr: ChangeDetectorRef,
+    private zone: NgZone,
+    public ticketsService: TicketsService,
   ) {}
 
   ngOnInit() {
@@ -107,6 +141,22 @@ export class GruposComponent implements OnInit {
 
   grupoVacio(): Grupo {
     return { id: 0, nombre: '', descripcion: '', nivel: '', miembros: [], tickets: 0 };
+  }
+
+  get minFecha(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  ticketVacio() {
+    return {
+      titulo: '',
+      descripcion: '',
+      estado: 'pendiente' as const,
+      asignadoA: '',
+      prioridad: 'media' as const,
+      fechaLimite: '',
+      grupoId: 0,
+    };
   }
 
   abrirNuevo() {
@@ -144,8 +194,10 @@ export class GruposComponent implements OnInit {
       header: 'Confirmar',
       icon: 'pi pi-trash',
       accept: () => {
-        this.grupos = this.grupos.filter((g) => g.id !== grupo.id);
-        this.msg.add({ severity: 'warn', summary: 'Eliminado', detail: 'Grupo eliminado' });
+        this.zone.run(() => {
+          this.grupos = [...this.grupos.filter((g) => g.id !== grupo.id)];
+          this.msg.add({ severity: 'warn', summary: 'Eliminado', detail: 'Grupo eliminado' });
+        });
       },
     });
   }
@@ -199,5 +251,21 @@ export class GruposComponent implements OnInit {
         });
       },
     });
+  }
+
+  abrirCrearTicket(grupo: Grupo) {
+    this.grupoTicket = grupo;
+    this.nuevoTicket = { ...this.ticketVacio(), grupoId: grupo.id };
+    this.dialogTicket = true;
+  }
+
+  crearTicket() {
+    if (!this.nuevoTicket.titulo) {
+      this.msg.add({ severity: 'error', summary: 'Error', detail: 'El título es obligatorio' });
+      return;
+    }
+    this.ticketsService.agregar(this.nuevoTicket);
+    this.dialogTicket = false;
+    this.msg.add({ severity: 'success', summary: 'Creado', detail: 'Ticket creado correctamente' });
   }
 }

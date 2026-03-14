@@ -6,13 +6,12 @@
 
   <div class="perfil-container">
     <p-card>
-
       <div class="perfil-header">
         <p-avatar label="JA" size="xlarge" shape="circle" />
         <div>
           <h3>{{ perfil.nombre }}</h3>
           <span class="username">@{{ perfil.usuario }}</span>
-          <div style="margin-top:0.5rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
+          <div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap">
             <p-tag [value]="perfil.rol" severity="success" />
           </div>
         </div>
@@ -58,11 +57,24 @@
       </div>
 
       <p-divider />
-      <div style="display:flex; gap:1rem; flex-wrap:wrap;">
-        <p-button label="Editar perfil" icon="pi pi-pencil" severity="info" (onClick)="abrirEdicion()" />
-        <p-button label="Eliminar cuenta" icon="pi pi-trash" severity="danger" (onClick)="eliminarCuenta()" />
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap">
+        <ng-container *ifHasPermission="'usuario.editar'">
+          <p-button
+            label="Editar perfil"
+            icon="pi pi-pencil"
+            severity="info"
+            (onClick)="abrirEdicion()"
+          />
+        </ng-container>
+        <ng-container *ifHasPermission="'usuario.eliminar'">
+          <p-button
+            label="Eliminar cuenta"
+            icon="pi pi-trash"
+            severity="danger"
+            (onClick)="eliminarCuenta()"
+          />
+        </ng-container>
       </div>
-
     </p-card>
   </div>
 
@@ -70,35 +82,54 @@
     [(visible)]="dialogVisible"
     header="Editar Perfil"
     [modal]="true"
-    [style]="{width: '420px'}">
-    <div style="display:flex; flex-direction:column; gap:1rem; padding:0.5rem 0;">
+    [style]="{ width: '420px' }"
+  >
+    <div style="display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem 0">
+      <input
+        pInputText
+        [(ngModel)]="perfilEdicion.nombre"
+        placeholder="Nombre completo"
+        style="width: 100%"
+      />
 
-      <input pInputText [(ngModel)]="perfilEdicion.nombre" placeholder="Nombre completo" style="width:100%" />
-
-      <input pInputText [(ngModel)]="perfilEdicion.email" placeholder="Email" style="width:100%" />
+      <input pInputText [(ngModel)]="perfilEdicion.email" placeholder="Email" style="width: 100%" />
       @if (perfilEdicion.email && !perfilEdicion.email.includes('@')) {
         <p-message severity="error" text="El email debe contener @" />
       }
 
-      <input pInputText [(ngModel)]="perfilEdicion.telefono" placeholder="Teléfono (10 dígitos)"
-        maxlength="10" (keypress)="soloNumeros($event)" style="width:100%" />
+      <input
+        pInputText
+        [(ngModel)]="perfilEdicion.telefono"
+        placeholder="Teléfono (10 dígitos)"
+        maxlength="10"
+        (keypress)="soloNumeros($event)"
+        style="width: 100%"
+      />
       @if (perfilEdicion.telefono.length > 0 && perfilEdicion.telefono.length < 10) {
         <p-message severity="warn" text="El teléfono debe tener 10 dígitos" />
       }
 
-      <input pInputText [(ngModel)]="perfilEdicion.direccion" placeholder="Dirección" style="width:100%" />
+      <input
+        pInputText
+        [(ngModel)]="perfilEdicion.direccion"
+        placeholder="Dirección"
+        style="width: 100%"
+      />
 
-      <input pInputText type="date" [(ngModel)]="perfilEdicion.fechaNacimiento"
-        [max]="maxFechaNacimiento" style="width:100%" />
+      <input
+        pInputText
+        type="date"
+        [(ngModel)]="perfilEdicion.fechaNacimiento"
+        [max]="maxFechaNacimiento"
+        style="width: 100%"
+      />
       @if (perfilEdicion.fechaNacimiento && perfilEdicion.fechaNacimiento > maxFechaNacimiento) {
         <p-message severity="error" text="Debes ser mayor de 18 años" />
       }
-
     </div>
     <ng-template pTemplate="footer">
       <p-button label="Cancelar" severity="secondary" (onClick)="dialogVisible = false" />
       <p-button label="Guardar" icon="pi pi-save" (onClick)="guardar()" />
     </ng-template>
   </p-dialog>
-
 </div>

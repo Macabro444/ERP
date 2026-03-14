@@ -5,9 +5,11 @@ export class PermissionsService {
   private permisosAdmin = [
     'dashboard.view',
     'grupos.view',
+    'grupos.crear',
     'grupos.editar',
     'grupos.eliminar',
     'usuario.view',
+    'usuario.eliminar',
     'usuario.editar',
     'tickets.view',
     'tickets.crear',
@@ -18,16 +20,15 @@ export class PermissionsService {
   private permisosCliente = [
     'mipanel.view',
     'ticket.ver-asignados',
-    //'ticket.editar-descripcion'//,
+    'ticket.editar-descripcion',
     'ticket.finalizar',
-    //'ticket.editar-estado'//,
+    //'ticket.editar-estado'//
   ];
 
   private userPermissions = signal<string[]>(this.cargarPermisos());
 
   private cargarPermisos(): string[] {
     try {
-      // sessionStorage es único por pestaña ← aquí el cambio
       const usuario = sessionStorage.getItem('usuario_activo');
       if (!usuario || (usuario !== 'admin' && usuario !== 'cliente')) {
         sessionStorage.clear();
@@ -51,13 +52,17 @@ export class PermissionsService {
   }
 
   setPermissions(tipo: 'admin' | 'cliente') {
-    sessionStorage.setItem('usuario_activo', tipo); // ← aquí el cambio
+    sessionStorage.setItem('usuario_activo', tipo);
     const permisos = tipo === 'admin' ? this.permisosAdmin : this.permisosCliente;
     this.userPermissions.set(permisos);
   }
 
   clearPermissions() {
     this.userPermissions.set([]);
-    sessionStorage.removeItem('usuario_activo'); // ← aquí el cambio
+    sessionStorage.removeItem('usuario_activo');
+  }
+
+  removePermission(permiso: string) {
+    this.userPermissions.update((permisos) => permisos.filter((p) => p !== permiso));
   }
 }

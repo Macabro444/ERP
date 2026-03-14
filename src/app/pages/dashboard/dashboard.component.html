@@ -1,3 +1,6 @@
+<p-toast />
+<p-confirmDialog />
+
 <div class="dashboard">
   <div class="stats-grid">
     <div class="stat-card total">
@@ -40,42 +43,47 @@
   <div class="controles">
     <div class="filtros">
       <p-select
-  [options]="grupos"
-  [ngModel]="grupoSeleccionado()"
-  (ngModelChange)="seleccionarGrupo($event)"
-  placeholder="Filtrar por grupo"
-  style="width:160px" />
-<span style="font-size:0.78rem; color:#94a3b8;">
-  Selecciona un grupo para ir a su vista
-</span>
+        [options]="grupos"
+        [ngModel]="grupoSeleccionado()"
+        (ngModelChange)="seleccionarGrupo($event)"
+        placeholder="Filtrar por grupo"
+        style="width: 160px"
+      />
+      <span style="font-size: 0.78rem; color: #94a3b8">
+        Selecciona un grupo para ir a su vista
+      </span>
 
-      <div [style.visibility]="vistaKanban() ? 'hidden' : 'visible'"
-         style="display:flex; gap:0.5rem; align-items:center;">
-      <p-select
-        [(ngModel)]="filtroEstado"
-        [options]="estadoOpciones"
-        placeholder="Estado"
-        style="width:140px" />
-      <p-select
-        [(ngModel)]="filtroPrioridad"
-        [options]="prioridadOpciones"
-        placeholder="Prioridad"
-        style="width:130px" />
-      <p-select
-        [(ngModel)]="filtroOrden"
-        [options]="ordenOpciones"
-        placeholder="Ordenar"
-        style="width:150px" />
+      <div
+        [style.visibility]="vistaKanban() ? 'hidden' : 'visible'"
+        style="display: flex; gap: 0.5rem; align-items: center"
+      >
+        <p-select
+          [(ngModel)]="filtroEstado"
+          [options]="estadoOpciones"
+          placeholder="Estado"
+          style="width: 140px"
+        />
+        <p-select
+          [(ngModel)]="filtroPrioridad"
+          [options]="prioridadOpciones"
+          placeholder="Prioridad"
+          style="width: 130px"
+        />
+        <p-select
+          [(ngModel)]="filtroOrden"
+          [options]="ordenOpciones"
+          placeholder="Ordenar"
+          style="width: 150px"
+        />
+      </div>
+    </div>
+
+    <div class="toggle-vista">
+      <span [class.activo]="!vistaKanban()"><i class="pi pi-list"></i> Lista</span>
+      <p-toggleswitch [(ngModel)]="vistaKanban" />
+      <span [class.activo]="vistaKanban()"><i class="pi pi-table"></i> Kanban</span>
     </div>
   </div>
-
-  <div class="toggle-vista">
-    <span [class.activo]="!vistaKanban()"><i class="pi pi-list"></i> Lista</span>
-    <p-toggleswitch [(ngModel)]="vistaKanban" />
-    <span [class.activo]="vistaKanban()"><i class="pi pi-table"></i> Kanban</span>
-  </div>
-</div>
-
   @if (!vistaKanban()) {
     <p-table
       [value]="ticketsFiltrados"
@@ -90,6 +98,7 @@
           <th>Prioridad</th>
           <th>Asignado a</th>
           <th style="white-space: nowrap">Fecha Límite</th>
+          <th>Acciones</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-ticket>
@@ -107,11 +116,39 @@
           </td>
           <td>{{ ticket.asignadoA || '—' }}</td>
           <td style="white-space: nowrap">{{ ticket.fechaLimite }}</td>
+          <td>
+            <div style="display: flex; gap: 0.5rem">
+              <p-button
+                icon="pi pi-eye"
+                severity="info"
+                pTooltip="Ver detalle"
+                (onClick)="verDetalle(ticket)"
+              />
+
+              <ng-container *ifHasPermission="'ticket.editar'">
+                <p-button
+                  icon="pi pi-pencil"
+                  severity="warn"
+                  pTooltip="Editar"
+                  (onClick)="abrirEditar(ticket)"
+                />
+              </ng-container>
+
+              <ng-container *ifHasPermission="'ticket.eliminar'">
+                <p-button
+                  icon="pi pi-trash"
+                  severity="danger"
+                  pTooltip="Eliminar"
+                  (onClick)="eliminar(ticket)"
+                />
+              </ng-container>
+            </div>
+          </td>
         </tr>
       </ng-template>
       <ng-template pTemplate="emptymessage">
         <tr>
-          <td colspan="5" style="text-align: center; padding: 2rem; color: #94a3b8">
+          <td colspan="6" style="text-align: center; padding: 2rem; color: #94a3b8">
             <i
               class="pi pi-ticket"
               style="font-size: 2rem; display: block; margin-bottom: 0.5rem"
@@ -160,6 +197,30 @@
                     <span style="font-size: 0.8rem">{{ ticket.asignadoA }}</span>
                   </div>
                 }
+
+                <div style="display: flex; gap: 0.4rem; margin-top: 0.5rem">
+                  <p-button
+                    icon="pi pi-eye"
+                    severity="info"
+                    size="small"
+                    pTooltip="Ver detalle"
+                    (onClick)="verDetalle(ticket)"
+                  />
+                  <p-button
+                    icon="pi pi-pencil"
+                    severity="warn"
+                    size="small"
+                    pTooltip="Editar"
+                    (onClick)="abrirEditar(ticket)"
+                  />
+                  <p-button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    size="small"
+                    pTooltip="Eliminar"
+                    (onClick)="eliminar(ticket)"
+                  />
+                </div>
               </div>
             }
             @if (ticketsPorEstado(col.estado).length === 0) {
@@ -171,3 +232,113 @@
     </div>
   }
 </div>
+
+<p-dialog
+  [(visible)]="dialogDetalle"
+  header="Detalle del Ticket"
+  [modal]="true"
+  [style]="{ width: '560px' }"
+>
+  @if (ticketSeleccionado) {
+    <div style="display: flex; flex-direction: column; gap: 1rem">
+      <div class="detalle-row">
+        <span class="detalle-label">Título</span>
+        <span>{{ ticketSeleccionado.titulo }}</span>
+      </div>
+      <div class="detalle-row">
+        <span class="detalle-label">Descripción</span>
+        <span>{{ ticketSeleccionado.descripcion }}</span>
+      </div>
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap">
+        <p-tag
+          [value]="ticketSeleccionado.estado"
+          [severity]="severidadEstado(ticketSeleccionado.estado)"
+        />
+        <p-tag
+          [value]="ticketSeleccionado.prioridad"
+          [severity]="severidadPrioridad(ticketSeleccionado.prioridad)"
+        />
+      </div>
+      <div class="detalle-row">
+        <span class="detalle-label">Asignado a</span>
+        <span>{{ ticketSeleccionado.asignadoA || '—' }}</span>
+      </div>
+      <div class="detalle-row">
+        <span class="detalle-label">Fecha límite</span>
+        <span>{{ ticketSeleccionado.fechaLimite }}</span>
+      </div>
+
+      <p-divider />
+
+      <h4 style="margin: 0"><i class="pi pi-comments"></i> Comentarios</h4>
+      @for (c of ticketSeleccionado.comentarios; track c.id) {
+        <div class="comentario">
+          <span class="comentario-autor">{{ c.autor }}</span>
+          <p>{{ c.texto }}</p>
+        </div>
+      }
+      @if (ticketSeleccionado.comentarios.length === 0) {
+        <p style="color: #94a3b8">Sin comentarios aún</p>
+      }
+      <div style="display: flex; gap: 0.5rem">
+        <input
+          pInputText
+          [(ngModel)]="nuevoComentario"
+          placeholder="Agregar comentario..."
+          style="flex: 1"
+        />
+        <p-button icon="pi pi-send" (onClick)="agregarComentario()" />
+      </div>
+    </div>
+  }
+</p-dialog>
+
+<p-dialog
+  [(visible)]="dialogEditar"
+  header="Editar Ticket"
+  [modal]="true"
+  [style]="{ width: '480px' }"
+>
+  @if (ticketEditar) {
+    <div style="display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem 0">
+      <input
+        pInputText
+        [(ngModel)]="ticketEditar.titulo"
+        placeholder="Título"
+        style="width: 100%"
+      />
+      <textarea
+        pTextarea
+        [(ngModel)]="ticketEditar.descripcion"
+        placeholder="Descripción"
+        rows="3"
+        style="width: 100%"
+      ></textarea>
+      <p-select
+        [(ngModel)]="ticketEditar.estado"
+        [options]="estadoOpciones"
+        placeholder="Estado"
+        style="width: 100%"
+      />
+      <p-select
+        [(ngModel)]="ticketEditar.prioridad"
+        [options]="prioridadOpciones"
+        placeholder="Prioridad"
+        style="width: 100%"
+      />
+      <p-select
+        [(ngModel)]="ticketEditar.asignadoA"
+        [options]="usuariosOpciones"
+        placeholder="Asignar a..."
+        style="width: 100%"
+      />
+      <label style="color: #64748b; font-size: 0.85rem">Fecha límite</label>
+      <input pInputText type="date" [(ngModel)]="ticketEditar.fechaLimite" style="width: 100%" />
+    </div>
+  }
+
+  <ng-template pTemplate="footer">
+    <p-button label="Cancelar" severity="secondary" (onClick)="dialogEditar = false" />
+    <p-button label="Guardar" icon="pi pi-save" (onClick)="guardarEdicion()" />
+  </ng-template>
+</p-dialog>

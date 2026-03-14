@@ -39,11 +39,11 @@ import { SelectModule } from 'primeng/select';
   styleUrl: './mi-panel.component.css',
 })
 export class MiPanelComponent {
-  // Usuario simulado del cliente
   cliente = {
     nombre: 'Emmanuel Martínez',
     usuario: 'EmmaM',
     email: 'emmamar@gmail.com',
+    departamento: 'Departamento TI'
   };
 
   dialogDetalle = false;
@@ -57,7 +57,6 @@ export class MiPanelComponent {
     private msg: MessageService,
   ) {}
 
-  // Filtra solo los tickets asignados al cliente
   get misTickets(): Ticket[] {
     return this.ticketsService.tickets().filter((t) => t.asignadoA === this.cliente.usuario);
   }
