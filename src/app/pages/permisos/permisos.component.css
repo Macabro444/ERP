@@ -1,0 +1,138 @@
+.page {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page-header h2 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Usuarios grid */
+.usuarios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.usuario-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  transition: box-shadow 0.2s;
+}
+
+.usuario-card:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.usuario-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.usuario-avatar.small {
+  width: 44px;
+  height: 44px;
+  font-size: 1rem;
+}
+
+.usuario-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.usuario-info h3 { margin: 0; color: #1e293b; }
+.usuario-info span { color: #64748b; font-size: 0.85rem; }
+.usuario-email { font-size: 0.78rem !important; }
+
+.usuario-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stats-num {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #3b82f6;
+}
+
+.stats-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* Permisos grid */
+.permisos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.permiso-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid #e2e8f0;
+}
+
+.permiso-card-header {
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-left: 4px solid;
+  background: #f8fafc;
+}
+
+.permiso-lista {
+  padding: 0.5rem 0;
+}
+
+.permiso-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s;
+}
+
+.permiso-row:hover { background: #f8fafc; }
+.permiso-row:last-child { border-bottom: none; }
+
+.permiso-nombre {
+  font-size: 0.82rem;
+  color: #475569;
+  font-family: monospace;
+}

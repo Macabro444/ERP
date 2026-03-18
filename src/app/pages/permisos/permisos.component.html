@@ -1,0 +1,72 @@
+<p-toast />
+
+<div class="page">
+
+  @if (!usuarioSeleccionado()) {
+    <div class="page-header">
+      <h2><i class="pi pi-shield"></i> Gestión de Permisos</h2>
+    </div>
+
+    <div class="usuarios-grid">
+      @for (u of usuarios; track u.id) {
+        <div class="usuario-card">
+          <div class="usuario-avatar">{{ u.avatar }}</div>
+          <div class="usuario-info">
+            <h3>{{ u.nombre }}</h3>
+            <span>@{{ u.usuario }}</span>
+            <span class="usuario-email">{{ u.email }}</span>
+            <p-tag
+              [value]="u.tipo === 'admin' ? 'Administrador' : 'Cliente'"
+              [severity]="u.tipo === 'admin' ? 'info' : 'success'" />
+          </div>
+          <div class="usuario-stats">
+            <span class="stats-num">{{ permisosEditables[u.id].length }}</span>
+            <span class="stats-label">permisos activos</span>
+          </div>
+          <p-button
+            label="Gestionar permisos"
+            icon="pi pi-cog"
+            (onClick)="seleccionar(u)" />
+        </div>
+      }
+    </div>
+  }
+
+  @if (usuarioSeleccionado()) {
+    <div class="page-header">
+      <div style="display:flex; align-items:center; gap:1rem;">
+        <p-button icon="pi pi-arrow-left" severity="secondary" (onClick)="volver()" />
+        <div class="usuario-avatar small">{{ usuarioSeleccionado()!.avatar }}</div>
+        <div>
+          <h2 style="margin:0;">{{ usuarioSeleccionado()!.nombre }}</h2>
+          <span style="color:#94a3b8;">@{{ usuarioSeleccionado()!.usuario }}</span>
+        </div>
+        <p-tag
+          [value]="usuarioSeleccionado()!.tipo === 'admin' ? 'Administrador' : 'Cliente'"
+          [severity]="usuarioSeleccionado()!.tipo === 'admin' ? 'info' : 'success'" />
+      </div>
+    </div>
+
+    <div class="permisos-grid">
+      @for (grupo of gruposPermisos; track grupo.modulo) {
+        <div class="permiso-card">
+          <div class="permiso-card-header" [style.border-color]="grupo.color">
+            <i class="pi {{ grupo.icono }}" [style.color]="grupo.color"></i>
+            <span [style.color]="grupo.color">{{ grupo.modulo }}</span>
+          </div>
+          <div class="permiso-lista">
+            @for (permiso of grupo.permisos; track permiso) {
+              <div class="permiso-row">
+                <span class="permiso-nombre">{{ permiso }}</span>
+                <p-toggleswitch
+                  [ngModel]="tienePermiso(usuarioSeleccionado()!.id, permiso)"
+                  (ngModelChange)="togglePermiso(usuarioSeleccionado()!, permiso)" />
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>

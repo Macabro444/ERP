@@ -9,6 +9,7 @@ import { UsuarioComponent } from './pages/usuario/usuario.component';
 import { MiPanelComponent } from './pages/mi-panel/mi-panel.component';
 import { authGuard } from './guards/auth-guard';
 import { permissionGuard } from './guards/permission.guard';
+import { PermisosComponent } from './pages/permisos/permisos.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -29,6 +30,11 @@ export const routes: Routes = [
         path: 'usuario',
         component: UsuarioComponent,
         canActivate: [permissionGuard('usuario.view')],
+      },
+      {
+        path: 'permisos',
+        component: PermisosComponent,
+        canActivate: [permissionGuard('permisos.view')],
       },
       {
         path: 'mi-panel',
