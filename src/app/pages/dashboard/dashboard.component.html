@@ -298,6 +298,7 @@
   header="Editar Ticket"
   [modal]="true"
   [style]="{ width: '480px' }"
+  [contentStyle]="{'overflow-y': 'auto', 'max-height': '60vh'}"
 >
   @if (ticketEditar) {
     <div style="display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem 0">

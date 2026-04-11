@@ -1,4 +1,5 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, OnInit, inject } from '@angular/core';
+import { ApplicationRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -10,14 +11,16 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { PermissionsService } from '../../services/permissions.service';
+import { ApiService } from '../../services/api.service';
 
 interface Usuario {
-  id: number;
+  id: string;
   nombre: string;
   usuario: string;
   email: string;
-  tipo: 'admin' | 'cliente';
   avatar: string;
+  tipo?: string;
+  permisos_globales: string[];
 }
 
 interface GrupoPermiso {
@@ -39,20 +42,15 @@ interface GrupoPermiso {
   templateUrl: './permisos.component.html',
   styleUrl: './permisos.component.css'
 })
-export class PermisosComponent {
+export class PermisosComponent implements OnInit {
+
+  private appRef = inject(ApplicationRef);
 
   usuarioSeleccionado = signal<Usuario | null>(null);
-
-  usuarios: Usuario[] = [
-    {
-      id: 1, nombre: 'Jorge Trejo', usuario: 'Macabro444',
-      email: 'macabrosss444@gmail.com', tipo: 'admin', avatar: 'JE'
-    },
-    {
-      id: 2, nombre: 'Emmanuel Martínez', usuario: 'EmmaM',
-      email: 'emmamar@gmail.com', tipo: 'cliente', avatar: 'EM'
-    }
-  ];
+  usuarios: Usuario[] = [];
+  cargando = true;
+  permisosEditables: Record<string, string[]> = {};
+  permisosMap: Record<string, string> = {};
 
   gruposPermisos: GrupoPermiso[] = [
     {
@@ -96,53 +94,105 @@ export class PermisosComponent {
     }
   ];
 
-  permisosEditables: Record<number, string[]> = {};
+  constructor(
+    private permissionsService: PermissionsService,
+    private api: ApiService,
+    private msg: MessageService
+  ) {}
 
-constructor(
-  private permissionsService: PermissionsService,
-  private msg: MessageService
-) {
-  this.permisosEditables = {
-    1: [...this.permissionsService['permisosAdmin']],
-    2: [...this.permissionsService['permisosCliente']]
-  };
-}
+  ngOnInit() {
+    this.cargarUsuarios();
+    this.cargarMapaPermisos();
+  }
+
+  cargarMapaPermisos() {
+    this.api.getPermisos().subscribe({
+      next: (res: any) => {
+        if (res.statusCode === 200) {
+          res.data.forEach((p: any) => {
+            this.permisosMap[p.nombre] = p.id;
+          });
+        }
+      }
+    });
+  }
+
+  cargarUsuarios() {
+    this.api.getUsuarios().subscribe({
+      next: (res: any) => {
+        this.cargando = false;
+        if (res.statusCode === 200) {
+          this.usuarios = res.data.map((u: any) => ({
+            id: u.id,
+            nombre: u.nombre_completo,
+            usuario: u.username,
+            email: u.email,
+            avatar: u.nombre_completo?.substring(0, 2).toUpperCase(),
+            tipo: u.permisos_globales?.length > 5 ? 'admin' : 'cliente',
+            permisos_globales: u.permisos_globales ?? []
+          }));
+
+          this.usuarios.forEach(u => {
+            this.permisosEditables[u.id] = [...u.permisos_globales];
+          });
+
+          this.appRef.tick();
+        }
+      },
+      error: () => {
+        this.cargando = false;
+      }
+    });
+  }
 
   seleccionar(usuario: Usuario) {
     this.usuarioSeleccionado.set(usuario);
+    this.appRef.tick();
   }
 
-  tienePermiso(usuarioId: number, permiso: string): boolean {
-    return this.permisosEditables[usuarioId]?.includes(permiso) ?? false;
+  tienePermiso(usuarioId: string, permisoNombre: string): boolean {
+    const permisoId = this.permisosMap[permisoNombre];
+    return this.permisosEditables[usuarioId]?.includes(permisoId) ?? false;
   }
 
-  togglePermiso(usuario: Usuario, permiso: string) {
-  const lista = [...this.permisosEditables[usuario.id]];
+  togglePermiso(usuario: Usuario, permisoNombre: string) {
+    const permisoId = this.permisosMap[permisoNombre];
+    if (!permisoId) return;
 
-  if (lista.includes(permiso)) {
-    this.permisosEditables[usuario.id] = lista.filter(p => p !== permiso);
-  } else {
-    this.permisosEditables[usuario.id] = [...lista, permiso];
+    const lista = [...this.permisosEditables[usuario.id]];
+    const tienePermiso = lista.includes(permisoId);
+
+    if (tienePermiso) {
+      this.permisosEditables[usuario.id] = lista.filter(p => p !== permisoId);
+    } else {
+      this.permisosEditables[usuario.id] = [...lista, permisoId];
+    }
+
+    this.api.updatePermisos(usuario.id, this.permisosEditables[usuario.id]).subscribe({
+      next: () => {
+        this.msg.add({
+          severity: tienePermiso ? 'warn' : 'success',
+          summary: tienePermiso ? 'Permiso removido' : 'Permiso agregado',
+          detail: `${permisoNombre} — ${usuario.nombre}`
+        });
+        this.appRef.tick();
+      },
+      error: () => {
+        this.msg.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo actualizar el permiso'
+        });
+      }
+    });
   }
-
-  const key = usuario.tipo === 'admin' ? 'permisos_admin' : 'permisos_cliente';
-  localStorage.setItem(key, JSON.stringify(this.permisosEditables[usuario.id]));
-
-  const activo = sessionStorage.getItem('usuario_activo');
-  if (activo === usuario.tipo) {
-    this.permissionsService['userPermissions'].set(
-      this.permisosEditables[usuario.id]
-    );
-  }
-
-  this.msg.add({
-    severity: lista.includes(permiso) ? 'warn' : 'success',
-    summary: lista.includes(permiso) ? 'Permiso removido' : 'Permiso agregado',
-    detail: `${permiso} — ${usuario.nombre}`
-  });
-}
 
   volver() {
     this.usuarioSeleccionado.set(null);
+    this.appRef.tick();
+  }
+
+  getPermisosActivos(usuarioId: string): number {
+    return this.permisosEditables[usuarioId]?.length ?? 0;
   }
 }

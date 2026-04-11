@@ -1,15 +1,21 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const authRoutes = require('./routes/auth.routes');
 
-const app = express();
+const app = express(); // ← primero crea app
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
 
+// Luego importa y usa las rutas
+const authRoutes = require('./routes/auth.routes');
+const usuariosRoutes = require('./routes/usuarios.routes');
+const permisosRoutes = require('./routes/permisos.routes');
+
 app.use('/auth', authRoutes);
+app.use('/usuarios', usuariosRoutes);
+app.use('/permisos', permisosRoutes);
 
 app.get('/health', (req, res) => {
   res.json({
@@ -20,5 +26,5 @@ app.get('/health', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`user-service corriendo en puerto ${PORT}`);
+  console.log(`✅ user-service corriendo en puerto ${PORT}`);
 });

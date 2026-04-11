@@ -24,9 +24,14 @@
       </i>
     </div>
 
-    <div>
-      <p-button label="Entrar" icon="" (onClick)="login()" styleClass="w-full" />
-    </div>
+ <div>
+  <button 
+    type="button"
+    (click)="login()"
+    style="width:100%; padding:0.75rem; background:#22c55e; color:white; border:none; border-radius:8px; cursor:pointer; font-size:1rem;">
+    {{ loading ? 'Entrando...' : 'Entrar' }}
+  </button>
+</div>
     <div>
       <p-button label="Regresar" icon="" severity="secondary" routerLink="/" />
     </div>

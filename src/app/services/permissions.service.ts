@@ -3,50 +3,38 @@ import { Injectable, signal } from '@angular/core';
 @Injectable({ providedIn: 'root' })
 export class PermissionsService {
 
-  private permisosAdmin = [
-    'dashboard.view', 'grupos.view', 'grupos.crear', 'grupos.editar', 'grupos.eliminar',
-    'usuario.view', 'usuario.eliminar', 'usuario.editar',
-    'tickets.view', 'tickets.crear', 'ticket.editar', 'ticket.eliminar',
-    'permisos.view'
-  ];
-
-  private permisosCliente = [
-    'mipanel.view', 'ticket.ver-asignados', 'ticket.editar-descripcion',
-    'ticket.finalizar', 'ticket.editar-estado'
-  ];
-
   private userPermissions = signal<string[]>(this.cargarPermisos());
-
-  constructor() {
-    window.addEventListener('storage', (event) => {
-      const usuario = sessionStorage.getItem('usuario_activo');
-      if (event.key === 'permisos_admin' && usuario === 'admin') {
-        this.userPermissions.set(JSON.parse(event.newValue || '[]'));
-      }
-      if (event.key === 'permisos_cliente' && usuario === 'cliente') {
-        this.userPermissions.set(JSON.parse(event.newValue || '[]'));
-      }
-    });
-  }
 
   private cargarPermisos(): string[] {
     try {
-      const usuario = sessionStorage.getItem('usuario_activo');
-      if (!usuario || (usuario !== 'admin' && usuario !== 'cliente')) {
-        sessionStorage.clear();
-        return [];
-      }
-      const key = usuario === 'admin' ? 'permisos_admin' : 'permisos_cliente';
-      const guardados = localStorage.getItem(key);
+      const guardados = localStorage.getItem('erp_permisos');
       if (guardados) return JSON.parse(guardados);
-
-      if (usuario === 'admin') return this.permisosAdmin;
-      if (usuario === 'cliente') return this.permisosCliente;
       return [];
     } catch {
-      sessionStorage.clear();
       return [];
     }
+  }
+
+  // Nuevo método — recibe array de UUIDs o nombres desde el gateway
+  setPermissionsFromArray(permisos: string[]): void {
+    this.userPermissions.set(permisos);
+    localStorage.setItem('erp_permisos', JSON.stringify(permisos));
+  }
+
+  // Mantener compatibilidad con código existente
+  setPermissions(tipo: 'admin' | 'cliente') {
+    const permisosAdmin = [
+      'dashboard.view', 'grupos.view', 'grupos.crear', 'grupos.editar', 'grupos.eliminar',
+      'usuario.view', 'usuario.eliminar', 'usuario.editar',
+      'tickets.view', 'tickets.crear', 'ticket.editar', 'ticket.eliminar',
+      'permisos.view'
+    ];
+    const permisosCliente = [
+      'mipanel.view', 'ticket.ver-asignados', 'ticket.editar-descripcion',
+      'ticket.finalizar', 'ticket.editar-estado'
+    ];
+    const permisos = tipo === 'admin' ? permisosAdmin : permisosCliente;
+    this.setPermissionsFromArray(permisos);
   }
 
   hasPermission(permiso: string): boolean {
@@ -57,21 +45,22 @@ export class PermissionsService {
     return permisos.some(p => this.hasPermission(p));
   }
 
-  setPermissions(tipo: 'admin' | 'cliente') {
-    sessionStorage.setItem('usuario_activo', tipo);
-    const key = tipo === 'admin' ? 'permisos_admin' : 'permisos_cliente';
-    const guardados = localStorage.getItem(key);
-    const permisos = guardados ? JSON.parse(guardados) :
-      tipo === 'admin' ? this.permisosAdmin : this.permisosCliente;
-    this.userPermissions.set(permisos);
-  }
-
-  clearPermissions() {
+  clearPermissions(): void {
     this.userPermissions.set([]);
-    sessionStorage.removeItem('usuario_activo');
+    localStorage.removeItem('erp_permisos');
+    localStorage.removeItem('erp_user');
   }
 
   removePermission(permiso: string) {
     this.userPermissions.update(permisos => permisos.filter(p => p !== permiso));
+  }
+
+  getUserInfo(): any {
+    try {
+      const user = localStorage.getItem('erp_user');
+      return user ? JSON.parse(user) : null;
+    } catch {
+      return null;
+    }
   }
 }

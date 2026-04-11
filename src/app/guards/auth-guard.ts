@@ -1,14 +1,18 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { PermissionsService } from '../services/permissions.service';
+import { ApiService } from '../services/api.service';
 
 export const authGuard: CanActivateFn = () => {
-  const permissions = inject(PermissionsService);
+  const api = inject(ApiService);
   const router = inject(Router);
 
-  const usuario = sessionStorage.getItem('usuario_activo');
+  const token = api.getToken();
+  const user = localStorage.getItem('erp_user');
 
-  if (!usuario) {
+  if (!token || !user) {
+    // Limpiar todo por si acaso
+    localStorage.removeItem('erp_user');
+    localStorage.removeItem('erp_permisos');
     router.navigate(['/login']);
     return false;
   }

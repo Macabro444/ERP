@@ -1,6 +1,10 @@
 const { authMiddleware } = require('../middleware/auth');
 
 async function proxyRoutes(fastify) {
+
+  // ============================================================
+  // AUTH
+  // ============================================================
   fastify.post('/auth/register', async (request, reply) => {
     const response = await fetch(`${process.env.USER_SERVICE_URL}/auth/register`, {
       method: 'POST',
@@ -21,8 +25,19 @@ async function proxyRoutes(fastify) {
     return reply.status(response.status).send(data);
   });
 
+  // ============================================================
+  // USUARIOS — perfil propio primero antes que /:id
+  // ============================================================
   fastify.get('/usuarios', { preHandler: authMiddleware }, async (request, reply) => {
     const response = await fetch(`${process.env.USER_SERVICE_URL}/usuarios`, {
+      headers: { Authorization: request.headers['authorization'] },
+    });
+    const data = await response.json();
+    return reply.status(response.status).send(data);
+  });
+
+  fastify.get('/usuarios/me/:id', { preHandler: authMiddleware }, async (request, reply) => {
+    const response = await fetch(`${process.env.USER_SERVICE_URL}/usuarios/perfil/${request.params.id}`, {
       headers: { Authorization: request.headers['authorization'] },
     });
     const data = await response.json();
@@ -42,6 +57,9 @@ async function proxyRoutes(fastify) {
     return reply.status(response.status).send(data);
   });
 
+  // ============================================================
+  // GRUPOS
+  // ============================================================
   fastify.get('/grupos', { preHandler: authMiddleware }, async (request, reply) => {
     const response = await fetch(`${process.env.GROUPS_SERVICE_URL}/grupos`, {
       headers: { Authorization: request.headers['authorization'] },
@@ -101,25 +119,21 @@ async function proxyRoutes(fastify) {
     return reply.status(response.status).send(data);
   });
 
-  // DELETE /grupos/:id/miembros/:userId - Quitar miembro
-  fastify.delete(
-    '/grupos/:id/miembros/:userId',
-    { preHandler: authMiddleware },
-    async (request, reply) => {
-      const response = await fetch(
-        `${process.env.GROUPS_SERVICE_URL}/grupos/${request.params.id}/miembros/${request.params.userId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: request.headers['authorization'],
-          },
-        },
-      );
-      const data = await response.json();
-      return reply.status(response.status).send(data);
-    },
-  );
+  fastify.delete('/grupos/:id/miembros/:userId', { preHandler: authMiddleware }, async (request, reply) => {
+    const response = await fetch(
+      `${process.env.GROUPS_SERVICE_URL}/grupos/${request.params.id}/miembros/${request.params.userId}`,
+      {
+        method: 'DELETE',
+        headers: { Authorization: request.headers['authorization'] },
+      },
+    );
+    const data = await response.json();
+    return reply.status(response.status).send(data);
+  });
 
+  // ============================================================
+  // TICKETS
+  // ============================================================
   fastify.get('/tickets', { preHandler: authMiddleware }, async (request, reply) => {
     const response = await fetch(`${process.env.TICKETS_SERVICE_URL}/tickets`, {
       headers: { Authorization: request.headers['authorization'] },
@@ -142,10 +156,32 @@ async function proxyRoutes(fastify) {
   });
 
   fastify.patch('/tickets/:id', { preHandler: authMiddleware }, async (request, reply) => {
+    const response = await fetch(`${process.env.TICKETS_SERVICE_URL}/tickets/${request.params.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: request.headers['authorization'],
+      },
+      body: JSON.stringify(request.body),
+    });
+    const data = await response.json();
+    return reply.status(response.status).send(data);
+  });
+
+  fastify.delete('/tickets/:id', { preHandler: authMiddleware }, async (request, reply) => {
+    const response = await fetch(`${process.env.TICKETS_SERVICE_URL}/tickets/${request.params.id}`, {
+      method: 'DELETE',
+      headers: { Authorization: request.headers['authorization'] },
+    });
+    const data = await response.json();
+    return reply.status(response.status).send(data);
+  });
+
+  fastify.post('/tickets/:id/comentarios', { preHandler: authMiddleware }, async (request, reply) => {
     const response = await fetch(
-      `${process.env.TICKETS_SERVICE_URL}/tickets/${request.params.id}`,
+      `${process.env.TICKETS_SERVICE_URL}/tickets/${request.params.id}/comentarios`,
       {
-        method: 'PATCH',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: request.headers['authorization'],
@@ -157,37 +193,35 @@ async function proxyRoutes(fastify) {
     return reply.status(response.status).send(data);
   });
 
-  fastify.delete('/tickets/:id', { preHandler: authMiddleware }, async (request, reply) => {
-    const response = await fetch(
-      `${process.env.TICKETS_SERVICE_URL}/tickets/${request.params.id}`,
-      {
-        method: 'DELETE',
-        headers: { Authorization: request.headers['authorization'] },
-      },
-    );
+  // ============================================================
+  // ESTADOS Y PRIORIDADES
+  // ============================================================
+  fastify.get('/estados', { preHandler: authMiddleware }, async (request, reply) => {
+    const response = await fetch(`${process.env.TICKETS_SERVICE_URL}/estados`, {
+      headers: { Authorization: request.headers['authorization'] },
+    });
     const data = await response.json();
     return reply.status(response.status).send(data);
   });
 
-  fastify.post(
-    '/tickets/:id/comentarios',
-    { preHandler: authMiddleware },
-    async (request, reply) => {
-      const response = await fetch(
-        `${process.env.TICKETS_SERVICE_URL}/tickets/${request.params.id}/comentarios`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: request.headers['authorization'],
-          },
-          body: JSON.stringify(request.body),
-        },
-      );
-      const data = await response.json();
-      return reply.status(response.status).send(data);
-    },
-  );
+  fastify.get('/prioridades', { preHandler: authMiddleware }, async (request, reply) => {
+    const response = await fetch(`${process.env.TICKETS_SERVICE_URL}/prioridades`, {
+      headers: { Authorization: request.headers['authorization'] },
+    });
+    const data = await response.json();
+    return reply.status(response.status).send(data);
+  });
+
+  // ============================================================
+  // PERMISOS
+  // ============================================================
+  fastify.get('/permisos', { preHandler: authMiddleware }, async (request, reply) => {
+    const response = await fetch(`${process.env.USER_SERVICE_URL}/permisos`, {
+      headers: { Authorization: request.headers['authorization'] },
+    });
+    const data = await response.json();
+    return reply.status(response.status).send(data);
+  });
 }
 
 module.exports = proxyRoutes;

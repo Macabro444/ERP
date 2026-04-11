@@ -219,6 +219,18 @@ async function ticketsRoutes(fastify) {
       });
     }
   });
+
+  fastify.get('/estados', async (request, reply) => {
+  const { data, error } = await supabase.from('estados').select('*');
+  if (error) return reply.status(500).send({ statusCode: 500, intOpCode: 'SxTK500', data: null });
+  return reply.status(200).send({ statusCode: 200, intOpCode: 'SxTK200', data });
+});
+
+fastify.get('/prioridades', async (request, reply) => {
+  const { data, error } = await supabase.from('prioridades').select('*').order('orden');
+  if (error) return reply.status(500).send({ statusCode: 500, intOpCode: 'SxTK500', data: null });
+  return reply.status(200).send({ statusCode: 200, intOpCode: 'SxTK200', data });
+});
 }
 
 module.exports = ticketsRoutes;

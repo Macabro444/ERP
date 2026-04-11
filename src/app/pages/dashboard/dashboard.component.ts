@@ -20,6 +20,8 @@ import { TicketsService, Ticket } from '../../services/tickets.service';
 import { Router } from '@angular/router';
 import { GrupoStateService } from '../../services/grupo-state';
 import { HasPermissionDirective } from '../../directives/has-permission.directive';
+import { ApiService } from '../../services/api.service';
+import { OnInit, ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-dashboard',
@@ -47,9 +49,9 @@ import { HasPermissionDirective } from '../../directives/has-permission.directiv
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   vistaKanban = signal(false);
-  grupoSeleccionado = signal<number | null>(null);
+  grupoSeleccionado = signal<string | null>(null);
 
   filtroEstado = '';
   filtroPrioridad = '';
@@ -61,11 +63,8 @@ export class DashboardComponent {
   nuevoComentario = '';
   ticketEditar: any = null;
 
-  grupos = [
-    { label: 'Departamentos', value: null },
-    { label: 'Departamento TI', value: 1 },
-    { label: 'Departamento Consejo Estudiantil', value: 2 },
-  ];
+grupos: any[] = [{ label: 'Departamentos', value: null }];
+
 
   estadoOpciones = [
     { label: 'Estado', value: '' },
@@ -104,13 +103,40 @@ export class DashboardComponent {
     { estado: 'finalizado', label: 'Finalizado', color: '#10b981' },
   ];
 
-  constructor(
-    public ticketsService: TicketsService,
-    private router: Router,
-    private grupoState: GrupoStateService,
-    private msg: MessageService,
-    private confirm: ConfirmationService,
-  ) {}
+ constructor(
+  public ticketsService: TicketsService,
+  private router: Router,
+  private msg: MessageService,
+  private confirm: ConfirmationService,
+  private api: ApiService,
+  private cdr: ChangeDetectorRef
+) {}
+
+ngOnInit() {
+  this.api.getGrupos().subscribe({
+    next: (res: any) => {
+      if (res.statusCode === 200) {
+        const opciones = res.data.map((g: any) => ({
+          label: g.nombre,
+          value: g.id
+        }));
+        this.grupos = [{ label: 'Departamentos', value: null }, ...opciones];
+        this.cdr.markForCheck();
+      }
+    }
+  });
+
+ this.api.getUsuarios().subscribe({
+  next: (res: any) => {
+    if (res.statusCode === 200) {
+      this.usuariosOpciones = res.data.map((u: any) => ({
+        label: u.username,
+        value: u.id  // ← ID en lugar de username
+      }));
+    }
+  }
+});
+}
 
   get ticketsFiltrados(): Ticket[] {
     let lista = this.ticketsService.tickets();
@@ -171,13 +197,12 @@ export class DashboardComponent {
     return map[prioridad] || 'info';
   }
 
-  seleccionarGrupo(valor: number | null) {
-    this.grupoSeleccionado.set(valor);
-    this.grupoState.grupoSeleccionado.set(valor);
-    if (valor !== null) {
-      this.router.navigate(['/app/grupos']);
-    }
+ seleccionarGrupo(valor: string | null) {
+  this.grupoSeleccionado.set(valor);
+  if (valor !== null) {
+    this.router.navigate(['/app/grupos']);
   }
+}
 
   verDetalle(ticket: Ticket) {
     this.ticketSeleccionado = { ...ticket };
@@ -186,16 +211,43 @@ export class DashboardComponent {
   }
 
   abrirEditar(ticket: Ticket) {
-    this.ticketEditar = { ...ticket };
-    this.dialogEditar = true;
-  }
+  // Buscar el ID del usuario asignado basado en su username
+  const usuarioAsignado = this.usuariosOpciones.find(
+    u => u.label === ticket.asignadoA
+  );
+  
+  this.ticketEditar = { 
+    ...ticket,
+    asignadoA: usuarioAsignado?.value ?? null
+  };
+  this.dialogEditar = true;
+}
 
   guardarEdicion() {
-    if (!this.ticketEditar.titulo) return;
-    this.ticketsService.actualizar(this.ticketEditar);
-    this.dialogEditar = false;
-    this.msg.add({ severity: 'success', summary: 'Actualizado', detail: 'Ticket actualizado' });
-  }
+  if (!this.ticketEditar.titulo) return;
+
+  // Buscar el ID del usuario asignado por username
+  const usuarioAsignado = this.usuariosOpciones.find(
+    u => u.label === this.ticketEditar.asignadoA
+  );
+
+  this.api.updateTicket(this.ticketEditar.id, {
+    titulo: this.ticketEditar.titulo,
+    descripcion: this.ticketEditar.descripcion,
+    fecha_final: this.ticketEditar.fechaLimite,
+    asignado_id: usuarioAsignado?.value ?? null
+  }).subscribe({
+    next: () => {
+      this.dialogEditar = false;
+      this.ticketsService.cargarTickets();
+      this.msg.add({ severity: 'success', summary: 'Actualizado', detail: 'Ticket actualizado' });
+      this.cdr.markForCheck();
+    },
+    error: () => {
+      this.msg.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar' });
+    }
+  });
+}
 
   eliminar(ticket: Ticket) {
     this.confirm.confirm({

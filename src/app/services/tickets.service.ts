@@ -1,150 +1,118 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
+import { ApplicationRef } from '@angular/core';
+import { ApiService } from './api.service';
 
 export interface Ticket {
-  id: number;
+  id: string;
   titulo: string;
   descripcion: string;
-  estado: 'pendiente' | 'en-progreso' | 'revision' | 'finalizado';
+  estado: string;
   asignadoA: string;
-  prioridad: 'baja' | 'media' | 'alta' | 'critica';
+  prioridad: string;
   fechaCreacion: string;
   fechaLimite: string;
   comentarios: Comentario[];
-  historial: Historial[];
-  grupoId: number;
+  historial: any[];
+  grupoId: string;
+  grupos?: any;
+  estados?: any;
+  prioridades?: any;
+  asignado?: any;
 }
 
 export interface Comentario {
-  id: number;
+  id: string;
   autor: string;
   texto: string;
   fecha: string;
 }
 
-export interface Historial {
-  id: number;
-  campo: string;
-  valorAnterior: string;
-  valorNuevo: string;
-  fecha: string;
-  usuario: string;
-}
-
 @Injectable({ providedIn: 'root' })
 export class TicketsService {
-  private _tickets = signal<Ticket[]>([
-    {
-      id: 1,
-      titulo: 'Configurar nuevo equipo en Edificio I Division DTAI',
-      descripcion: 'Configurar laptop para el Mtro.Emmanual Garcia',
-      estado: 'en-progreso',
-      asignadoA: 'Macabro444',
-      prioridad: 'alta',
-      fechaCreacion: '2026-03-06',
-      fechaLimite: '2026-03-10',
-      comentarios: [
-        {
-          id: 1,
-          autor: 'Macabro444',
-          texto: 'Va, En un momento paso a recogerla',
-          fecha: '2026-03-07',
-        },
-      ],
-      historial: [
-        {
-          id: 1,
-          campo: 'estado',
-          valorAnterior: 'pendiente',
-          valorNuevo: 'en-progreso',
-          fecha: '2026-03-07',
-          usuario: 'Macabro444',
-        },
-      ],
-      grupoId: 1,
-    },
-    {
-      id: 2,
-      titulo: 'Configurar Cañon para proyectar en Edificio K Division DTAI',
-      descripcion: 'Favor de ayudarme a configurar el proyector, ya que el HDMI no esta agarrando',
-      estado: 'finalizado',
-      asignadoA: 'MoiLoz',
-      prioridad: 'media',
-      fechaCreacion: '2026-03-01',
-      fechaLimite: '2026-03-03',
-      comentarios: [],
-      historial: [],
-      grupoId: 1,
-    },
-    {
-      id: 3,
-      titulo: 'Pasar a recoger los Boletos para la rifa',
-      descripcion: 'Favor de pasar por su bonche de boletos para venderlos',
-      estado: 'pendiente',
-      asignadoA: 'EmmaM',
-      prioridad: 'baja',
-      fechaCreacion: '2026-03-01',
-      fechaLimite: '2026-03-10',
-      comentarios: [],
-      historial: [],
-      grupoId: 2,
-    },
-  ]);
+  private _tickets = signal<Ticket[]>([]);
+  cargando = signal(false);
+  private appRef = inject(ApplicationRef);
+
+  constructor(private api: ApiService) {
+    this.cargarTickets();
+  }
+
+  cargarTickets() {
+    this.cargando.set(true);
+    this.api.getTickets().subscribe({
+      next: (res: any) => {
+        this.cargando.set(false);
+        if (res.statusCode === 200) {
+          const tickets = res.data.map((t: any) => ({
+            id: t.id,
+            titulo: t.titulo,
+            descripcion: t.descripcion,
+            estado: t.estados?.nombre ?? t.estado_id,
+            asignadoA: t.asignado?.username ?? 'Sin asignar',
+            prioridad: t.prioridades?.nombre ?? t.prioridad_id,
+            fechaCreacion: t.creado_en?.split('T')[0] ?? '',
+            fechaLimite: t.fecha_final ?? '',
+            comentarios: t.comentarios?.map((c: any) => ({
+              id: c.id,
+              autor: c.autor?.username ?? 'Usuario',
+              texto: c.contenido,
+              fecha: c.creado_en?.split('T')[0] ?? ''
+            })) ?? [],
+            historial: [],
+            grupoId: t.grupo_id,
+            grupos: t.grupos,
+            estados: t.estados,
+            prioridades: t.prioridades,
+            asignado: t.asignado
+          }));
+          this._tickets.set(tickets);
+          this.appRef.tick();
+        }
+      },
+      error: () => {
+        this.cargando.set(false);
+      }
+    });
+  }
+
 
   get tickets() {
     return this._tickets;
   }
 
-  agregar(ticket: Omit<Ticket, 'id' | 'fechaCreacion' | 'comentarios' | 'historial'>) {
-    const nuevo: Ticket = {
-      ...ticket,
-      id: this._tickets().length + 1,
-      fechaCreacion: new Date().toISOString().split('T')[0],
-      comentarios: [],
-      historial: [
-        {
-          id: 1,
-          campo: 'estado',
-          valorAnterior: '',
-          valorNuevo: ticket.estado,
-          fecha: new Date().toISOString().split('T')[0],
-          usuario: 'Macabro444',
-        },
-      ],
-    };
-    this._tickets.update((t) => [...t, nuevo]);
+  agregar(ticket: any) {
+    this.api.createTicket(ticket).subscribe({
+      next: () => this.cargarTickets()
+    });
   }
 
   actualizar(ticket: Ticket) {
-    this.tickets.update((lista) => lista.map((t) => (t.id === ticket.id ? { ...ticket } : t)));
+    this.api.updateTicket(ticket.id, {
+      titulo: ticket.titulo,
+      descripcion: ticket.descripcion,
+      fecha_final: ticket.fechaLimite
+    }).subscribe({
+      next: () => this.cargarTickets()
+    });
   }
 
-  eliminar(id: number) {
-    this._tickets.update((ts) => ts.filter((t) => t.id !== id));
+  eliminar(id: string) {
+    this.api.deleteTicket(id).subscribe({
+      next: () => this.cargarTickets()
+    });
   }
 
-  agregarComentario(ticketId: number, texto: string) {
-    this._tickets.update((ts) =>
-      ts.map((t) => {
-        if (t.id === ticketId) {
-          return {
-            ...t,
-            comentarios: [
-              ...t.comentarios,
-              {
-                id: t.comentarios.length + 1,
-                autor: 'Macabro444',
-                texto,
-                fecha: new Date().toISOString().split('T')[0],
-              },
-            ],
-          };
-        }
-        return t;
-      }),
-    );
+  agregarComentario(ticketId: string, texto: string) {
+    const user = JSON.parse(localStorage.getItem('erp_user') || '{}');
+    this.api.addComentario(ticketId, {
+      contenido: texto,
+      autor_id: user.id
+    }).subscribe({
+      next: () => this.cargarTickets()
+    });
   }
 
-  porGrupo(grupoId: number) {
+  porGrupo(grupoId: string) {
     return this._tickets().filter((t) => t.grupoId === grupoId);
   }
 }

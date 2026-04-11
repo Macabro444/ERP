@@ -71,27 +71,38 @@ router.post('/login', validateLogin, async (req, res) => {
     }
 
     
-    const { data: perfil } = await supabase
-      .from('usuarios')
-      .select('*, permisos_globales')
-      .eq('id', data.user.id)
-      .single();
+    // Obtener permisos del usuario con nombres
+const { data: perfil } = await supabase
+  .from('usuarios')
+  .select('*, permisos_globales')
+  .eq('id', data.user.id)
+  .single();
 
-    return res.status(200).json({
-      statusCode: 200,
-      intOpCode: 'SxUS200',
-      data: {
-        token: data.session.access_token,
-        refresh_token: data.session.refresh_token,
-        user: {
-          id: data.user.id,
-          email: data.user.email,
-          nombre_completo: perfil?.nombre_completo,
-          username: perfil?.username,
-          permisos: perfil?.permisos_globales ?? []
-        }
-      }
-    });
+// Resolver nombres de permisos
+let nombresPermisos = [];
+if (perfil?.permisos_globales?.length > 0) {
+  const { data: permisosData } = await supabase
+    .from('permisos')
+    .select('nombre')
+    .in('id', perfil.permisos_globales);
+  nombresPermisos = permisosData?.map((p) => p.nombre) ?? [];
+}
+
+return res.status(200).json({
+  statusCode: 200,
+  intOpCode: 'SxUS200',
+  data: {
+    token: data.session.access_token,
+    refresh_token: data.session.refresh_token,
+    user: {
+      id: data.user.id,
+      email: data.user.email,
+      nombre_completo: perfil?.nombre_completo,
+      username: perfil?.username,
+      permisos: nombresPermisos
+    }
+  }
+});
 
   } catch (err) {
     return res.status(500).json({

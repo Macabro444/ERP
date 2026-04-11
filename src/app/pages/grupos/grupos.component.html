@@ -118,12 +118,12 @@
       placeholder="Descripción"
       style="width: 100%"
     />
-    <input
-      pInputText
-      [(ngModel)]="grupoActual.nivel"
-      placeholder="Nivel (Básico, Avanzado...)"
-      style="width: 100%"
-    />
+    <p-select
+  [(ngModel)]="grupoActual.nivel"
+  [options]="nivelOpciones"
+  placeholder="Selecciona nivel"
+  style="width: 100%"
+/>
   </div>
   <ng-template pTemplate="footer">
     <p-button label="Cancelar" severity="secondary" (onClick)="dialogGrupo = false" />

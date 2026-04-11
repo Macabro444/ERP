@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -16,42 +16,29 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { TicketsService, Ticket } from '../../services/tickets.service';
 import { TooltipModule } from 'primeng/tooltip';
 import { AvatarModule } from 'primeng/avatar';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-tickets',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    ButtonModule,
-    TableModule,
-    DialogModule,
-    InputTextModule,
-    TextareaModule,
-    SelectModule,
-    TagModule,
-    CardModule,
-    ToastModule,
-    ConfirmDialogModule,
-    DividerModule,
-    TooltipModule,
-    AvatarModule,
+    CommonModule, FormsModule, ButtonModule, TableModule,
+    DialogModule, InputTextModule, TextareaModule, SelectModule,
+    TagModule, CardModule, ToastModule, ConfirmDialogModule,
+    DividerModule, TooltipModule, AvatarModule,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './tickets.component.html',
   styleUrl: './tickets.component.css',
 })
-export class TicketsComponent {
+export class TicketsComponent implements OnInit {
   dialogCrear = false;
   dialogDetalle = false;
   ticketSeleccionado: Ticket | null = null;
   nuevoComentario = '';
 
-  usuarios = [
-    { label: 'Macabro444', value: 'Jorge Trejo' },
-    { label: 'MoiLoz', value: 'Moises Lozano' },
-    { label: 'Sin asignar', value: '' },
-  ];
+  grupos: any[] = [];
+  usuariosOpciones: any[] = [];
 
   estadoOpciones = [
     { label: 'Pendiente', value: 'pendiente' },
@@ -67,13 +54,80 @@ export class TicketsComponent {
     { label: 'Crítica', value: 'critica' },
   ];
 
-  nuevoTicket = this.ticketVacio();
+  // IDs de estados y prioridades
+  estadosIds: Record<string, string> = {};
+  prioridadesIds: Record<string, string> = {};
+
+  nuevoTicket: any = {};
 
   constructor(
     public ticketsService: TicketsService,
     private msg: MessageService,
     private confirm: ConfirmationService,
-  ) {}
+    private api: ApiService,
+    private cdr: ChangeDetectorRef
+  ) {
+    this.nuevoTicket = this.ticketVacio();
+  }
+
+  ngOnInit() {
+    this.cargarGrupos();
+    this.cargarUsuarios();
+    this.cargarEstados();
+    this.cargarPrioridades();
+  }
+
+  cargarGrupos() {
+    this.api.getGrupos().subscribe({
+      next: (res: any) => {
+        if (res.statusCode === 200) {
+          this.grupos = res.data.map((g: any) => ({
+            label: g.nombre,
+            value: g.id
+          }));
+          this.cdr.markForCheck();
+        }
+      }
+    });
+  }
+
+  cargarUsuarios() {
+    this.api.getUsuarios().subscribe({
+      next: (res: any) => {
+        if (res.statusCode === 200) {
+          this.usuariosOpciones = res.data.map((u: any) => ({
+            label: u.username,
+            value: u.id
+          }));
+          this.cdr.markForCheck();
+        }
+      }
+    });
+  }
+
+  cargarEstados() {
+    this.api.getEstados().subscribe({
+      next: (res: any) => {
+        if (res.statusCode === 200) {
+          res.data.forEach((e: any) => {
+            this.estadosIds[e.nombre] = e.id;
+          });
+        }
+      }
+    });
+  }
+
+  cargarPrioridades() {
+    this.api.getPrioridades().subscribe({
+      next: (res: any) => {
+        if (res.statusCode === 200) {
+          res.data.forEach((p: any) => {
+            this.prioridadesIds[p.nombre] = p.id;
+          });
+        }
+      }
+    });
+  }
 
   get tickets() {
     return this.ticketsService.tickets();
@@ -83,15 +137,19 @@ export class TicketsComponent {
     return new Date().toISOString().split('T')[0];
   }
 
+  get usuarios() {
+  return this.usuariosOpciones;
+}
+
   ticketVacio() {
     return {
       titulo: '',
       descripcion: '',
-      estado: 'pendiente' as const,
-      asignadoA: '',
-      prioridad: 'media' as const,
+      estado: 'pendiente',
+      prioridad: 'media',
       fechaLimite: '',
-      grupoId: 1,
+      grupoId: '',
+      asignadoId: ''
     };
   }
 
@@ -125,9 +183,31 @@ export class TicketsComponent {
       this.msg.add({ severity: 'error', summary: 'Error', detail: 'El título es obligatorio' });
       return;
     }
-    this.ticketsService.agregar(this.nuevoTicket);
-    this.dialogCrear = false;
-    this.msg.add({ severity: 'success', summary: 'Creado', detail: 'Ticket creado correctamente' });
+
+    const user = JSON.parse(localStorage.getItem('erp_user') || '{}');
+
+    const ticketData = {
+      titulo: this.nuevoTicket.titulo,
+      descripcion: this.nuevoTicket.descripcion,
+      grupo_id: this.nuevoTicket.grupoId,
+      estado_id: this.estadosIds[this.nuevoTicket.estado],
+      prioridad_id: this.prioridadesIds[this.nuevoTicket.prioridad],
+      autor_id: user.id,
+      asignado_id: this.nuevoTicket.asignadoId || null,
+      fecha_final: this.nuevoTicket.fechaLimite || null
+    };
+
+    this.api.createTicket(ticketData).subscribe({
+      next: () => {
+        this.dialogCrear = false;
+        this.ticketsService.cargarTickets();
+        this.msg.add({ severity: 'success', summary: 'Creado', detail: 'Ticket creado correctamente' });
+        this.cdr.markForCheck();
+      },
+      error: (err: any) => {
+        this.msg.add({ severity: 'error', summary: 'Error', detail: 'No se pudo crear el ticket' });
+      }
+    });
   }
 
   verDetalle(ticket: Ticket) {
@@ -137,13 +217,15 @@ export class TicketsComponent {
   }
 
   agregarComentario() {
-    if (!this.nuevoComentario.trim()) return;
-    this.ticketsService.agregarComentario(this.ticketSeleccionado!.id, this.nuevoComentario);
-    this.ticketSeleccionado = this.ticketsService
-      .tickets()
-      .find((t) => t.id === this.ticketSeleccionado!.id)!;
+    if (!this.nuevoComentario.trim() || !this.ticketSeleccionado) return;
+    this.ticketsService.agregarComentario(
+      this.ticketSeleccionado.id,
+      this.nuevoComentario
+    );
     this.nuevoComentario = '';
+    this.dialogDetalle = false;
     this.msg.add({ severity: 'success', summary: 'Comentario agregado', detail: '' });
+    this.cdr.markForCheck();
   }
 
   eliminar(ticket: Ticket) {
@@ -154,6 +236,7 @@ export class TicketsComponent {
       accept: () => {
         this.ticketsService.eliminar(ticket.id);
         this.msg.add({ severity: 'warn', summary: 'Eliminado', detail: 'Ticket eliminado' });
+        this.cdr.markForCheck();
       },
     });
   }
