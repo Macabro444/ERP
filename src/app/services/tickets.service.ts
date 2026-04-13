@@ -55,7 +55,7 @@ export class TicketsService {
             comentarios:
               t.comentarios?.map((c: any) => ({
                 id: c.id,
-                autor: c.autor?.username ?? 'Usuario',
+                autor: c.autor?.username ?? c.autor?.nombre_completo ?? 'Usuario',
                 texto: c.contenido,
                 fecha: c.creado_en?.split('T')[0] ?? '',
               })) ?? [],

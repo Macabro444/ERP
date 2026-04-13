@@ -15,7 +15,7 @@ async function ticketsRoutes(fastify) {
           grupos(nombre),
           autor:usuarios!tickets_autor_id_fkey(username, nombre_completo),
           asignado:usuarios!tickets_asignado_id_fkey(username, nombre_completo),
-          comentarios(id, contenido, creado_en)
+          comentarios( id, contenido, creado_en, autor:usuarios(username, nombre_completo))
         `,
         )
         .order('creado_en', { ascending: false });
