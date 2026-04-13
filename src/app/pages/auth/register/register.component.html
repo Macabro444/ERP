@@ -1,15 +1,43 @@
 <p-toast />
-<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem;">
-  <div style="width:420px; display:flex; flex-direction:column; gap:0.8rem; padding:2rem; border:1px solid #ddd; border-radius:12px;">
-    
-    <h2 style="text-align:center;">Crear Cuenta</h2>
+<div
+  style="
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  "
+>
+  <div
+    style="
+      width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+      padding: 2rem;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+    "
+  >
+    <h2 style="text-align: center">Crear Cuenta</h2>
 
-    <input pInputText formControlName="usuario" [formControl]="$any(f['usuario'])" placeholder="Usuario" style="width:100%" />
+    <input
+      pInputText
+      formControlName="usuario"
+      [formControl]="$any(f['usuario'])"
+      placeholder="Usuario"
+      style="width: 100%"
+    />
     @if (f['usuario'].touched && f['usuario'].errors?.['required']) {
       <p-message severity="error" text="El usuario es obligatorio" />
     }
 
-    <input pInputText [formControl]="$any(f['email'])" placeholder="Correo electrónico" style="width:100%" />
+    <input
+      pInputText
+      [formControl]="$any(f['email'])"
+      placeholder="Correo electrónico"
+      style="width: 100%"
+    />
     @if (f['email'].touched && f['email'].errors?.['required']) {
       <p-message severity="error" text="El email es obligatorio" />
     }
@@ -17,17 +45,32 @@
       <p-message severity="error" text="Email no válido" />
     }
 
-    <input pInputText [formControl]="$any(f['nombre'])" placeholder="Nombre completo" style="width:100%" />
+    <input
+      pInputText
+      [formControl]="$any(f['nombre'])"
+      placeholder="Nombre completo"
+      style="width: 100%"
+    />
     @if (f['nombre'].touched && f['nombre'].errors?.['required']) {
       <p-message severity="error" text="El nombre es obligatorio" />
     }
 
-    <input pInputText [formControl]="$any(f['direccion'])" placeholder="Dirección" style="width:100%" />
+    <input
+      pInputText
+      [formControl]="$any(f['direccion'])"
+      placeholder="Dirección"
+      style="width: 100%"
+    />
     @if (f['direccion'].touched && f['direccion'].errors?.['required']) {
       <p-message severity="error" text="La dirección es obligatoria" />
     }
 
-    <input pInputText [formControl]="$any(f['telefono'])" placeholder="Teléfono (10 dígitos)" style="width:100%" />
+    <input
+      pInputText
+      [formControl]="$any(f['telefono'])"
+      placeholder="Teléfono (10 dígitos)"
+      style="width: 100%"
+    />
     @if (f['telefono'].touched && f['telefono'].errors?.['required']) {
       <p-message severity="error" text="El teléfono es obligatorio" />
     }
@@ -35,7 +78,7 @@
       <p-message severity="error" text="Solo números, exactamente 10 dígitos" />
     }
 
-    <input pInputText type="date" [formControl]="$any(f['fechaNacimiento'])" style="width:100%" />
+    <input pInputText type="date" [formControl]="$any(f['fechaNacimiento'])" style="width: 100%" />
     @if (f['fechaNacimiento'].touched && f['fechaNacimiento'].errors?.['required']) {
       <p-message severity="error" text="La fecha de nacimiento es obligatoria" />
     }
@@ -43,10 +86,26 @@
       <p-message severity="error" text="Debes ser mayor de 18 años" />
     }
 
-    <div style="position:relative;">
-      <input pInputText [type]="showPassword ? 'text' : 'password'" [formControl]="$any(f['password'])" placeholder="Contraseña" style="width:100%; padding-right:2.5rem;" />
-      <i [class]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'" (click)="showPassword = !showPassword"
-        style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:#888;"></i>
+    <div style="position: relative">
+      <input
+        pInputText
+        [type]="showPassword ? 'text' : 'password'"
+        [formControl]="$any(f['password'])"
+        placeholder="Contraseña"
+        style="width: 100%; padding-right: 2.5rem"
+      />
+      <i
+        [class]="showPassword ? 'pi pi-eye-slash' : 'pi pi-eye'"
+        (click)="showPassword = !showPassword"
+        style="
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          cursor: pointer;
+          color: #888;
+        "
+      ></i>
     </div>
     @if (f['password'].touched && f['password'].errors?.['required']) {
       <p-message severity="error" text="La contraseña es obligatoria" />
@@ -58,22 +117,44 @@
       <p-message severity="error" text="Debe incluir al menos un símbolo: ! @ # $ % ^ & *" />
     }
 
-    <div style="position:relative;">
-      <input pInputText [type]="showConfirm ? 'text' : 'password'" [formControl]="$any(f['confirmar'])" placeholder="Confirmar contraseña" style="width:100%; padding-right:2.5rem;" />
-      <i [class]="showConfirm ? 'pi pi-eye-slash' : 'pi pi-eye'" (click)="showConfirm = !showConfirm"
-        style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; color:#888;"></i>
+    <div style="position: relative">
+      <input
+        pInputText
+        [type]="showConfirm ? 'text' : 'password'"
+        [formControl]="$any(f['confirmar'])"
+        placeholder="Confirmar contraseña"
+        style="width: 100%; padding-right: 2.5rem"
+      />
+      <i
+        [class]="showConfirm ? 'pi pi-eye-slash' : 'pi pi-eye'"
+        (click)="showConfirm = !showConfirm"
+        style="
+          position: absolute;
+          right: 10px;
+          top: 50%;
+          transform: translateY(-50%);
+          cursor: pointer;
+          color: #888;
+        "
+      ></i>
     </div>
     @if (form.touched && form.errors?.['noCoinciden']) {
       <p-message severity="error" text="Las contraseñas no coinciden" />
     }
 
     <div>
-      <p-button label="Registrarse" icon="" severity="success" (onClick)="registrar()" styleClass="w-full" />
+      <p-button
+        label="Registrarse"
+        icon=""
+        severity="success"
+        (onClick)="registrar()"
+        styleClass="w-full"
+      />
     </div>
     <div>
       <p-button label="Regresar" icon="" severity="secondary" routerLink="/" />
     </div>
 
-    <p style="text-align:center;">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
+    <p style="text-align: center">¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></p>
   </div>
 </div>

@@ -1,9 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 const publicRoutes = [
   { method: 'POST', url: '/auth/register' },
@@ -11,21 +8,26 @@ const publicRoutes = [
 ];
 
 const isPublicRoute = (method, url) => {
-  return publicRoutes.some(r => r.method === method && r.url === url);
+  return publicRoutes.some((r) => r.method === method && r.url === url);
 };
 
 const permisosRequeridos = {
-  'POST /grupos': 'grupos.crear',
-  'PATCH /grupos': 'grupos.editar',
-  'DELETE /grupos': 'grupos.eliminar',
-  'GET /grupos': 'grupos.view',
-  'POST /tickets': 'tickets.crear',
-  'PATCH /tickets': 'ticket.editar',
-  'DELETE /tickets': 'ticket.eliminar',
-  'GET /tickets': 'tickets.view',
-  'GET /usuarios': 'usuario.view',
-  'PATCH /usuarios': 'usuario.editar',
-  'DELETE /usuarios': 'usuario.eliminar',
+  'POST /grupos': ['grupos.crear'],
+  'PATCH /grupos': ['grupos.editar'],
+  'DELETE /grupos': ['grupos.eliminar'],
+  'GET /grupos': ['grupos.view'],
+  'POST /tickets': ['tickets.crear'],
+  'PATCH /tickets': [
+    'ticket.editar',
+    'ticket.finalizar',
+    'ticket.editar-estado',
+    'ticket.editar-descripcion',
+  ],
+  'DELETE /tickets': ['ticket.eliminar'],
+  'GET /tickets': ['tickets.view'],
+  'GET /usuarios': ['usuario.view'],
+  'PATCH /usuarios': ['usuario.editar'],
+  'DELETE /usuarios': ['usuario.eliminar'],
 };
 
 const authMiddleware = async (request, reply) => {
@@ -38,18 +40,21 @@ const authMiddleware = async (request, reply) => {
     return reply.status(401).send({
       statusCode: 401,
       intOpCode: 'SxGW401',
-      data: { message: 'Token requerido' }
+      data: { message: 'Token requerido' },
     });
   }
 
   const token = authHeader.split(' ')[1];
 
-  const { data: { user }, error } = await supabase.auth.getUser(token);
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(token);
   if (error || !user) {
     return reply.status(401).send({
       statusCode: 401,
       intOpCode: 'SxGW401',
-      data: { message: 'Token inválido o expirado' }
+      data: { message: 'Token inválido o expirado' },
     });
   }
 
@@ -67,25 +72,23 @@ const authMiddleware = async (request, reply) => {
       .from('permisos')
       .select('nombre')
       .in('id', permisosIds);
-    nombresPermisos = permisosData?.map(p => p.nombre) ?? [];
+    nombresPermisos = permisosData?.map((p) => p.nombre) ?? [];
   }
 
   const baseUrl = '/' + url.split('/')[1];
   const key = `${method} ${baseUrl}`;
+
   const permisoRequerido = permisosRequeridos[key];
 
-  console.log('Usuario ID:', user.id);
-console.log('Permisos IDs:', permisosIds);
-console.log('Nombres permisos:', nombresPermisos);
-console.log('Key buscada:', key);
-console.log('Permiso requerido:', permisoRequerido);
-
-  if (permisoRequerido && !nombresPermisos.includes(permisoRequerido)) {
-    return reply.status(403).send({
-      statusCode: 403,
-      intOpCode: 'SxGW403',
-      data: { message: 'No tienes permiso para realizar esta acción' }
-    });
+  if (permisoRequerido) {
+    const tienePermiso = permisoRequerido.some((p) => nombresPermisos.includes(p));
+    if (!tienePermiso) {
+      return reply.status(403).send({
+        statusCode: 403,
+        intOpCode: 'SxGW403',
+        data: { message: 'No tienes permiso para realizar esta acción' },
+      });
+    }
   }
 
   request.user = user;

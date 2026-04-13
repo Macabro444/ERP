@@ -10,7 +10,7 @@ export const authGuard: CanActivateFn = () => {
   const user = localStorage.getItem('erp_user');
 
   if (!token || !user) {
-    // Limpiar todo por si acaso
+  
     localStorage.removeItem('erp_user');
     localStorage.removeItem('erp_permisos');
     router.navigate(['/login']);

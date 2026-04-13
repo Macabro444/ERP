@@ -242,11 +242,11 @@
   @if (ticketSeleccionado) {
     <div style="display: flex; flex-direction: column; gap: 1rem">
       <div class="detalle-row">
-        <span class="detalle-label">Título</span>
+        <span class="detalle-label">Título:</span>
         <span>{{ ticketSeleccionado.titulo }}</span>
       </div>
       <div class="detalle-row">
-        <span class="detalle-label">Descripción</span>
+        <span class="detalle-label">Descripción:</span>
         <span>{{ ticketSeleccionado.descripcion }}</span>
       </div>
       <div style="display: flex; gap: 1rem; flex-wrap: wrap">
@@ -260,11 +260,11 @@
         />
       </div>
       <div class="detalle-row">
-        <span class="detalle-label">Asignado a</span>
+        <span class="detalle-label">Asignado a:</span>
         <span>{{ ticketSeleccionado.asignadoA || '—' }}</span>
       </div>
       <div class="detalle-row">
-        <span class="detalle-label">Fecha límite</span>
+        <span class="detalle-label">Fecha límite:</span>
         <span>{{ ticketSeleccionado.fechaLimite }}</span>
       </div>
 
@@ -274,6 +274,7 @@
       @for (c of ticketSeleccionado.comentarios; track c.id) {
         <div class="comentario">
           <span class="comentario-autor">{{ c.autor }}</span>
+          <span class="comentario-tag">comentó:</span>
           <p>{{ c.texto }}</p>
         </div>
       }
@@ -298,7 +299,7 @@
   header="Editar Ticket"
   [modal]="true"
   [style]="{ width: '480px' }"
-  [contentStyle]="{'overflow-y': 'auto', 'max-height': '60vh'}"
+  [contentStyle]="{ 'overflow-y': 'auto', 'max-height': '60vh' }"
 >
   @if (ticketEditar) {
     <div style="display: flex; flex-direction: column; gap: 1rem; padding: 0.5rem 0">
@@ -329,7 +330,7 @@
       />
       <p-select
         [(ngModel)]="ticketEditar.asignadoA"
-        [options]="usuariosOpciones"
+        [options]="usuariosTicketEditar"
         placeholder="Asignar a..."
         style="width: 100%"
       />

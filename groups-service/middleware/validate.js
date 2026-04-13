@@ -5,7 +5,7 @@ const validateGrupo = (req, res, next) => {
     return res.status(400).json({
       statusCode: 400,
       intOpCode: 'SxGR400',
-      data: { message: 'El nombre del grupo es obligatorio' }
+      data: { message: 'El nombre del grupo es obligatorio' },
     });
   }
 
@@ -14,7 +14,7 @@ const validateGrupo = (req, res, next) => {
     return res.status(400).json({
       statusCode: 400,
       intOpCode: 'SxGR401',
-      data: { message: 'Nivel inválido. Debe ser Básico, Intermedio o Avanzado' }
+      data: { message: 'Nivel inválido. Debe ser Básico, Intermedio o Avanzado' },
     });
   }
 
@@ -28,7 +28,7 @@ const validateMiembro = (req, res, next) => {
     return res.status(400).json({
       statusCode: 400,
       intOpCode: 'SxGR400',
-      data: { message: 'El usuario_id es obligatorio' }
+      data: { message: 'El usuario_id es obligatorio' },
     });
   }
 

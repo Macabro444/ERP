@@ -1,7 +1,6 @@
 <p-toast />
 
 <div class="page">
-
   @if (!usuarioSeleccionado()) {
     <div class="page-header">
       <h2><i class="pi pi-shield"></i> Gestión de Permisos</h2>
@@ -17,16 +16,14 @@
             <span class="usuario-email">{{ u.email }}</span>
             <p-tag
               [value]="u.tipo === 'admin' ? 'Administrador' : 'Cliente'"
-              [severity]="u.tipo === 'admin' ? 'info' : 'success'" />
+              [severity]="u.tipo === 'admin' ? 'info' : 'success'"
+            />
           </div>
           <div class="usuario-stats">
             <span class="stats-num">{{ permisosEditables[u.id].length }}</span>
             <span class="stats-label">permisos activos</span>
           </div>
-          <p-button
-            label="Gestionar permisos"
-            icon="pi pi-cog"
-            (onClick)="seleccionar(u)" />
+          <p-button label="Gestionar permisos" icon="pi pi-cog" (onClick)="seleccionar(u)" />
         </div>
       }
     </div>
@@ -34,16 +31,17 @@
 
   @if (usuarioSeleccionado()) {
     <div class="page-header">
-      <div style="display:flex; align-items:center; gap:1rem;">
+      <div style="display: flex; align-items: center; gap: 1rem">
         <p-button icon="pi pi-arrow-left" severity="secondary" (onClick)="volver()" />
         <div class="usuario-avatar small">{{ usuarioSeleccionado()!.avatar }}</div>
         <div>
-          <h2 style="margin:0;">{{ usuarioSeleccionado()!.nombre }}</h2>
-          <span style="color:#94a3b8;">@{{ usuarioSeleccionado()!.usuario }}</span>
+          <h2 style="margin: 0">{{ usuarioSeleccionado()!.nombre }}</h2>
+          <span style="color: #94a3b8">@{{ usuarioSeleccionado()!.usuario }}</span>
         </div>
         <p-tag
           [value]="usuarioSeleccionado()!.tipo === 'admin' ? 'Administrador' : 'Cliente'"
-          [severity]="usuarioSeleccionado()!.tipo === 'admin' ? 'info' : 'success'" />
+          [severity]="usuarioSeleccionado()!.tipo === 'admin' ? 'info' : 'success'"
+        />
       </div>
     </div>
 
@@ -60,7 +58,8 @@
                 <span class="permiso-nombre">{{ permiso }}</span>
                 <p-toggleswitch
                   [ngModel]="tienePermiso(usuarioSeleccionado()!.id, permiso)"
-                  (ngModelChange)="togglePermiso(usuarioSeleccionado()!, permiso)" />
+                  (ngModelChange)="togglePermiso(usuarioSeleccionado()!, permiso)"
+                />
               </div>
             }
           </div>
@@ -68,5 +67,4 @@
       }
     </div>
   }
-
 </div>

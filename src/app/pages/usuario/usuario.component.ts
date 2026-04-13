@@ -22,9 +22,18 @@ import { PermissionsService } from '../../services/permissions.service';
   selector: 'app-usuario',
   standalone: true,
   imports: [
-    CardModule, TagModule, DividerModule, AvatarModule,
-    ButtonModule, DialogModule, InputTextModule, FormsModule,
-    ToastModule, ConfirmDialogModule, CommonModule, Message,
+    CardModule,
+    TagModule,
+    DividerModule,
+    AvatarModule,
+    ButtonModule,
+    DialogModule,
+    InputTextModule,
+    FormsModule,
+    ToastModule,
+    ConfirmDialogModule,
+    CommonModule,
+    Message,
     HasPermissionDirective,
   ],
   providers: [MessageService, ConfirmationService],
@@ -55,7 +64,7 @@ export class UsuarioComponent implements OnInit {
     private router: Router,
     private api: ApiService,
     private permissions: PermissionsService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
@@ -73,7 +82,7 @@ export class UsuarioComponent implements OnInit {
               telefono: u.telefono ?? '',
               direccion: u.direccion ?? '',
               fechaNacimiento: u.fecha_nacimiento ?? '',
-              rol: user.permisos?.includes('dashboard.view') ? 'Administrador' : 'Cliente'
+              rol: user.permisos?.includes('dashboard.view') ? 'Administrador' : 'Cliente',
             };
             this.cdr.markForCheck();
             this.appRef.tick();
@@ -81,7 +90,7 @@ export class UsuarioComponent implements OnInit {
         },
         error: (err: any) => {
           console.log('Error getPerfil:', err);
-        }
+        },
       });
     }
   }
@@ -113,7 +122,11 @@ export class UsuarioComponent implements OnInit {
 
   guardar() {
     if (!this.perfilEdicion.nombre || !this.perfilEdicion.email) {
-      this.msg.add({ severity: 'error', summary: 'Error', detail: 'Nombre y email son obligatorios' });
+      this.msg.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Nombre y email son obligatorios',
+      });
       return;
     }
     if (!this.perfilEdicion.email.includes('@')) {
@@ -121,27 +134,41 @@ export class UsuarioComponent implements OnInit {
       return;
     }
     if (this.perfilEdicion.telefono.length !== 10) {
-      this.msg.add({ severity: 'error', summary: 'Error', detail: 'El teléfono debe tener exactamente 10 dígitos' });
+      this.msg.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'El teléfono debe tener exactamente 10 dígitos',
+      });
       return;
     }
 
-    this.api.updatePerfil(this.perfil.id, {
-      nombre_completo: this.perfilEdicion.nombre,
-      username: this.perfilEdicion.usuario,
-      telefono: this.perfilEdicion.telefono,
-      direccion: this.perfilEdicion.direccion,
-      fecha_nacimiento: this.perfilEdicion.fechaNacimiento
-    }).subscribe({
-      next: () => {
-        this.perfil = { ...this.perfilEdicion };
-        this.dialogVisible = false;
-        this.msg.add({ severity: 'success', summary: '¡Actualizado!', detail: 'Perfil actualizado correctamente' });
-        this.appRef.tick();
-      },
-      error: () => {
-        this.msg.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar el perfil' });
-      }
-    });
+    this.api
+      .updatePerfil(this.perfil.id, {
+        nombre_completo: this.perfilEdicion.nombre,
+        username: this.perfilEdicion.usuario,
+        telefono: this.perfilEdicion.telefono,
+        direccion: this.perfilEdicion.direccion,
+        fecha_nacimiento: this.perfilEdicion.fechaNacimiento,
+      })
+      .subscribe({
+        next: () => {
+          this.perfil = { ...this.perfilEdicion };
+          this.dialogVisible = false;
+          this.msg.add({
+            severity: 'success',
+            summary: '¡Actualizado!',
+            detail: 'Perfil actualizado correctamente',
+          });
+          this.appRef.tick();
+        },
+        error: () => {
+          this.msg.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'No se pudo actualizar el perfil',
+          });
+        },
+      });
   }
 
   eliminarCuenta() {

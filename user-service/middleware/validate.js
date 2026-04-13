@@ -5,7 +5,7 @@ const validateRegister = (req, res, next) => {
     return res.status(400).json({
       statusCode: 400,
       intOpCode: 'SxUS400',
-      data: { message: 'Todos los campos son obligatorios' }
+      data: { message: 'Todos los campos son obligatorios' },
     });
   }
 
@@ -14,7 +14,7 @@ const validateRegister = (req, res, next) => {
     return res.status(400).json({
       statusCode: 400,
       intOpCode: 'SxUS401',
-      data: { message: 'Formato de email inválido' }
+      data: { message: 'Formato de email inválido' },
     });
   }
 
@@ -23,7 +23,7 @@ const validateRegister = (req, res, next) => {
     return res.status(400).json({
       statusCode: 400,
       intOpCode: 'SxUS402',
-      data: { message: 'El teléfono debe tener exactamente 10 dígitos numéricos' }
+      data: { message: 'El teléfono debe tener exactamente 10 dígitos numéricos' },
     });
   }
 
@@ -32,7 +32,9 @@ const validateRegister = (req, res, next) => {
     return res.status(400).json({
       statusCode: 400,
       intOpCode: 'SxUS403',
-      data: { message: 'La contraseña debe tener mínimo 10 caracteres y al menos un símbolo (!@#$%^&*)' }
+      data: {
+        message: 'La contraseña debe tener mínimo 10 caracteres y al menos un símbolo (!@#$%^&*)',
+      },
     });
   }
 
@@ -45,7 +47,7 @@ const validateRegister = (req, res, next) => {
     return res.status(400).json({
       statusCode: 400,
       intOpCode: 'SxUS404',
-      data: { message: 'Debes ser mayor de 18 años para registrarte' }
+      data: { message: 'Debes ser mayor de 18 años para registrarte' },
     });
   }
 
@@ -59,7 +61,7 @@ const validateLogin = (req, res, next) => {
     return res.status(400).json({
       statusCode: 400,
       intOpCode: 'SxUS400',
-      data: { message: 'Email y contraseña son obligatorios' }
+      data: { message: 'Email y contraseña son obligatorios' },
     });
   }
 
@@ -68,7 +70,7 @@ const validateLogin = (req, res, next) => {
     return res.status(400).json({
       statusCode: 400,
       intOpCode: 'SxUS401',
-      data: { message: 'Formato de email inválido' }
+      data: { message: 'Formato de email inválido' },
     });
   }
 

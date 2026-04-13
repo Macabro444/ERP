@@ -22,10 +22,21 @@ import { ApiService } from '../../services/api.service';
   selector: 'app-tickets',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ButtonModule, TableModule,
-    DialogModule, InputTextModule, TextareaModule, SelectModule,
-    TagModule, CardModule, ToastModule, ConfirmDialogModule,
-    DividerModule, TooltipModule, AvatarModule,
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    TableModule,
+    DialogModule,
+    InputTextModule,
+    TextareaModule,
+    SelectModule,
+    TagModule,
+    CardModule,
+    ToastModule,
+    ConfirmDialogModule,
+    DividerModule,
+    TooltipModule,
+    AvatarModule,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './tickets.component.html',
@@ -54,7 +65,6 @@ export class TicketsComponent implements OnInit {
     { label: 'Crítica', value: 'critica' },
   ];
 
-  // IDs de estados y prioridades
   estadosIds: Record<string, string> = {};
   prioridadesIds: Record<string, string> = {};
 
@@ -65,7 +75,7 @@ export class TicketsComponent implements OnInit {
     private msg: MessageService,
     private confirm: ConfirmationService,
     private api: ApiService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {
     this.nuevoTicket = this.ticketVacio();
   }
@@ -83,11 +93,11 @@ export class TicketsComponent implements OnInit {
         if (res.statusCode === 200) {
           this.grupos = res.data.map((g: any) => ({
             label: g.nombre,
-            value: g.id
+            value: g.id,
           }));
           this.cdr.markForCheck();
         }
-      }
+      },
     });
   }
 
@@ -97,11 +107,11 @@ export class TicketsComponent implements OnInit {
         if (res.statusCode === 200) {
           this.usuariosOpciones = res.data.map((u: any) => ({
             label: u.username,
-            value: u.id
+            value: u.id,
           }));
           this.cdr.markForCheck();
         }
-      }
+      },
     });
   }
 
@@ -113,7 +123,7 @@ export class TicketsComponent implements OnInit {
             this.estadosIds[e.nombre] = e.id;
           });
         }
-      }
+      },
     });
   }
 
@@ -125,7 +135,7 @@ export class TicketsComponent implements OnInit {
             this.prioridadesIds[p.nombre] = p.id;
           });
         }
-      }
+      },
     });
   }
 
@@ -138,8 +148,8 @@ export class TicketsComponent implements OnInit {
   }
 
   get usuarios() {
-  return this.usuariosOpciones;
-}
+    return this.usuariosOpciones;
+  }
 
   ticketVacio() {
     return {
@@ -149,7 +159,7 @@ export class TicketsComponent implements OnInit {
       prioridad: 'media',
       fechaLimite: '',
       grupoId: '',
-      asignadoId: ''
+      asignadoId: '',
     };
   }
 
@@ -194,19 +204,23 @@ export class TicketsComponent implements OnInit {
       prioridad_id: this.prioridadesIds[this.nuevoTicket.prioridad],
       autor_id: user.id,
       asignado_id: this.nuevoTicket.asignadoId || null,
-      fecha_final: this.nuevoTicket.fechaLimite || null
+      fecha_final: this.nuevoTicket.fechaLimite || null,
     };
 
     this.api.createTicket(ticketData).subscribe({
       next: () => {
         this.dialogCrear = false;
         this.ticketsService.cargarTickets();
-        this.msg.add({ severity: 'success', summary: 'Creado', detail: 'Ticket creado correctamente' });
+        this.msg.add({
+          severity: 'success',
+          summary: 'Creado',
+          detail: 'Ticket creado correctamente',
+        });
         this.cdr.markForCheck();
       },
       error: (err: any) => {
         this.msg.add({ severity: 'error', summary: 'Error', detail: 'No se pudo crear el ticket' });
-      }
+      },
     });
   }
 
@@ -218,10 +232,7 @@ export class TicketsComponent implements OnInit {
 
   agregarComentario() {
     if (!this.nuevoComentario.trim() || !this.ticketSeleccionado) return;
-    this.ticketsService.agregarComentario(
-      this.ticketSeleccionado.id,
-      this.nuevoComentario
-    );
+    this.ticketsService.agregarComentario(this.ticketSeleccionado.id, this.nuevoComentario);
     this.nuevoComentario = '';
     this.dialogDetalle = false;
     this.msg.add({ severity: 'success', summary: 'Comentario agregado', detail: '' });

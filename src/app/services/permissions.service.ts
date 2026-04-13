@@ -2,7 +2,6 @@ import { Injectable, signal } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class PermissionsService {
-
   private userPermissions = signal<string[]>(this.cargarPermisos());
 
   private cargarPermisos(): string[] {
@@ -15,23 +14,33 @@ export class PermissionsService {
     }
   }
 
-  // Nuevo método — recibe array de UUIDs o nombres desde el gateway
   setPermissionsFromArray(permisos: string[]): void {
     this.userPermissions.set(permisos);
     localStorage.setItem('erp_permisos', JSON.stringify(permisos));
   }
 
-  // Mantener compatibilidad con código existente
   setPermissions(tipo: 'admin' | 'cliente') {
     const permisosAdmin = [
-      'dashboard.view', 'grupos.view', 'grupos.crear', 'grupos.editar', 'grupos.eliminar',
-      'usuario.view', 'usuario.eliminar', 'usuario.editar',
-      'tickets.view', 'tickets.crear', 'ticket.editar', 'ticket.eliminar',
-      'permisos.view'
+      'dashboard.view',
+      'grupos.view',
+      'grupos.crear',
+      'grupos.editar',
+      'grupos.eliminar',
+      'usuario.view',
+      'usuario.eliminar',
+      'usuario.editar',
+      'tickets.view',
+      'tickets.crear',
+      'ticket.editar',
+      'ticket.eliminar',
+      'permisos.view',
     ];
     const permisosCliente = [
-      'mipanel.view', 'ticket.ver-asignados', 'ticket.editar-descripcion',
-      'ticket.finalizar', 'ticket.editar-estado'
+      'mipanel.view',
+      'ticket.ver-asignados',
+      'ticket.editar-descripcion',
+      'ticket.finalizar',
+      'ticket.editar-estado',
     ];
     const permisos = tipo === 'admin' ? permisosAdmin : permisosCliente;
     this.setPermissionsFromArray(permisos);
@@ -42,7 +51,7 @@ export class PermissionsService {
   }
 
   hasAnyPermission(permisos: string[]): boolean {
-    return permisos.some(p => this.hasPermission(p));
+    return permisos.some((p) => this.hasPermission(p));
   }
 
   clearPermissions(): void {
@@ -52,7 +61,7 @@ export class PermissionsService {
   }
 
   removePermission(permiso: string) {
-    this.userPermissions.update(permisos => permisos.filter(p => p !== permiso));
+    this.userPermissions.update((permisos) => permisos.filter((p) => p !== permiso));
   }
 
   getUserInfo(): any {

@@ -22,9 +22,19 @@ import { ApiService } from '../../services/api.service';
   selector: 'app-mi-panel',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ButtonModule, CardModule,
-    TagModule, TableModule, DialogModule, InputTextModule,
-    TextareaModule, DividerModule, AvatarModule, ToastModule, SelectModule,
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    CardModule,
+    TagModule,
+    TableModule,
+    DialogModule,
+    InputTextModule,
+    TextareaModule,
+    DividerModule,
+    AvatarModule,
+    ToastModule,
+    SelectModule,
   ],
   providers: [MessageService],
   templateUrl: './mi-panel.component.html',
@@ -38,7 +48,7 @@ export class MiPanelComponent implements OnInit {
     nombre: '',
     usuario: '',
     email: '',
-    departamento: ''
+    departamento: '',
   };
 
   dialogDetalle = false;
@@ -58,46 +68,40 @@ export class MiPanelComponent implements OnInit {
     public ticketsService: TicketsService,
     public permissions: PermissionsService,
     private msg: MessageService,
-    private api: ApiService
+    private api: ApiService,
   ) {}
 
   ngOnInit() {
-  const user = JSON.parse(localStorage.getItem('erp_user') || '{}');
-  
-  // Cargar inmediatamente desde localStorage
-  if (user.id) {
-    this.cliente = {
-      id: user.id,
-      nombre: user.nombre_completo ?? '',
-      usuario: user.username ?? '',
-      email: user.email ?? '',
-      departamento: ''
-    };
-    this.appRef.tick();
+    const user = JSON.parse(localStorage.getItem('erp_user') || '{}');
+    if (user.id) {
+      this.cliente = {
+        id: user.id,
+        nombre: user.nombre_completo ?? '',
+        usuario: user.username ?? '',
+        email: user.email ?? '',
+        departamento: '',
+      };
 
-    // Luego actualizar desde la API
-    this.api.getPerfil(user.id).subscribe({
-      next: (res: any) => {
-        if (res.statusCode === 200) {
-          const u = res.data;
-          this.cliente = {
-            id: u.id,
-            nombre: u.nombre_completo ?? '',
-            usuario: u.username ?? '',
-            email: u.email ?? '',
-            departamento: ''
-          };
-          setTimeout(() => this.appRef.tick(), 0);
-        }
-      }
-    });
+      this.api.getPerfil(user.id).subscribe({
+        next: (res: any) => {
+          if (res.statusCode === 200) {
+            const u = res.data;
+            this.cliente = {
+              id: u.id,
+              nombre: u.nombre_completo ?? '',
+              usuario: u.username ?? '',
+              email: u.email ?? '',
+              departamento: '',
+            };
+            setTimeout(() => this.appRef.tick(), 50);
+          }
+        },
+      });
+    }
   }
-}
 
   get misTickets(): Ticket[] {
-    return this.ticketsService.tickets().filter(
-      (t) => t.asignadoA === this.cliente.usuario
-    );
+    return this.ticketsService.tickets().filter((t) => t.asignadoA === this.cliente.usuario);
   }
 
   get stats() {
@@ -122,17 +126,25 @@ export class MiPanelComponent implements OnInit {
 
   guardarDescripcion() {
     if (!this.nuevaDescripcion.trim()) {
-      this.msg.add({ severity: 'error', summary: 'Error', detail: 'La descripción no puede estar vacía' });
+      this.msg.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'La descripción no puede estar vacía',
+      });
       return;
     }
     const actualizado: Ticket = {
       ...this.ticketSeleccionado!,
       descripcion: this.nuevaDescripcion,
-      historial: []
+      historial: [],
     };
     this.ticketsService.actualizar(actualizado);
     this.dialogEditar = false;
-    this.msg.add({ severity: 'success', summary: '¡Actualizado!', detail: 'Descripción guardada correctamente' });
+    this.msg.add({
+      severity: 'success',
+      summary: '¡Actualizado!',
+      detail: 'Descripción guardada correctamente',
+    });
   }
 
   abrirCambiarEstado(ticket: Ticket) {
@@ -145,17 +157,50 @@ export class MiPanelComponent implements OnInit {
     const actualizado: Ticket = {
       ...this.ticketSeleccionado!,
       estado: this.nuevoEstado,
-      historial: []
+      historial: [],
     };
     this.ticketsService.actualizar(actualizado);
     this.dialogEstado = false;
-    this.msg.add({ severity: 'success', summary: 'Estado actualizado', detail: `Ticket movido a ${this.nuevoEstado}` });
+    this.msg.add({
+      severity: 'success',
+      summary: 'Estado actualizado',
+      detail: `Ticket movido a ${this.nuevoEstado}`,
+    });
   }
 
   finalizarTicket(ticket: Ticket) {
-    const actualizado: Ticket = { ...ticket, estado: 'finalizado', historial: [] };
-    this.ticketsService.actualizar(actualizado);
-    this.msg.add({ severity: 'success', summary: '¡Finalizado!', detail: 'Ticket marcado como finalizado' });
+    this.api.getEstados().subscribe({
+      next: (res: any) => {
+        if (res.statusCode === 200) {
+          const estadoFinalizado = res.data.find((e: any) => e.nombre === 'finalizado');
+          if (estadoFinalizado) {
+            this.api
+              .updateTicket(ticket.id, {
+                estado_id: estadoFinalizado.id,
+              })
+              .subscribe({
+                next: () => {
+                  this.ticketsService.cargarTickets();
+                  this.msg.add({
+                    severity: 'success',
+                    summary: '¡Finalizado!',
+                    detail: 'Ticket marcado como finalizado',
+                  });
+                  setTimeout(() => this.appRef.tick(), 50);
+                },
+                error: (err) => {
+                  console.log('Error finalizar:', err);
+                  this.msg.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'No se pudo finalizar el ticket',
+                  });
+                },
+              });
+          }
+        }
+      },
+    });
   }
 
   severidadEstado(estado: string) {

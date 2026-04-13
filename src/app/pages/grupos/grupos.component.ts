@@ -38,10 +38,21 @@ interface Grupo {
   selector: 'app-grupos',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ButtonModule, TableModule,
-    DialogModule, InputTextModule, TagModule, CardModule,
-    ToastModule, ConfirmDialogModule, AvatarModule, DividerModule,
-    SelectModule, TextareaModule, HasPermissionDirective,
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    TableModule,
+    DialogModule,
+    InputTextModule,
+    TagModule,
+    CardModule,
+    ToastModule,
+    ConfirmDialogModule,
+    AvatarModule,
+    DividerModule,
+    SelectModule,
+    TextareaModule,
+    HasPermissionDirective,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './grupos.component.html',
@@ -104,8 +115,13 @@ export class GruposComponent implements OnInit {
 
   ticketVacio() {
     return {
-      titulo: '', descripcion: '', estado: 'pendiente',
-      asignadoA: '', prioridad: 'media', fechaLimite: '', grupoId: ''
+      titulo: '',
+      descripcion: '',
+      estado: 'pendiente',
+      asignadoA: '',
+      prioridad: 'media',
+      fechaLimite: '',
+      grupoId: '',
     };
   }
 
@@ -119,47 +135,54 @@ export class GruposComponent implements OnInit {
       next: (res: any) => {
         this.cargando = false;
         if (res.statusCode === 200) {
-          this.grupos = res.data.map((g: any) => ({
-            id: g.id,
-            nombre: g.nombre,
-            descripcion: g.descripcion ?? '',
-            nivel: g.nivel ?? '',
-            creador_id: g.creador_id,
-            tickets: 0,
-            miembros: g.miembros?.map((m: any) => ({
-              id: m.usuario?.id ?? m.usuario_id,
-              nombre: m.usuario?.nombre_completo ?? '',
-              usuario: m.usuario?.username ?? '',
-              email: m.usuario?.email ?? ''
-            })) ?? []
-          }));
-          this.cdr.markForCheck();
+          this.api.getTickets().subscribe({
+            next: (ticketsRes: any) => {
+              const todosTickets = ticketsRes.data ?? [];
+              this.grupos = res.data.map((g: any) => ({
+                id: g.id,
+                nombre: g.nombre,
+                descripcion: g.descripcion ?? '',
+                nivel: g.nivel ?? '',
+                creador_id: g.creador_id,
+                tickets: todosTickets.filter((t: any) => t.grupo_id === g.id).length,
+                miembros:
+                  g.miembros?.map((m: any) => ({
+                    id: m.usuario?.id ?? m.usuario_id,
+                    nombre: m.usuario?.nombre_completo ?? '',
+                    usuario: m.usuario?.username ?? '',
+                    email: m.usuario?.email ?? '',
+                  })) ?? [],
+              }));
+              this.cdr.markForCheck();
+            },
+          });
         }
       },
-      error: () => { this.cargando = false; }
+      error: () => {
+        this.cargando = false;
+      },
     });
   }
 
   cargarUsuarios() {
-  this.api.getUsuarios().subscribe({
-    next: (res: any) => {
-      if (res.statusCode === 200) {
-        this.usuariosDisponibles = res.data.map((u: any) => ({
-          id: u.id,
-          nombre: u.nombre_completo,
-          usuario: u.username,
-          email: u.email
-        }));
-        // ← AGREGA ESTO
-        this.usuariosOpciones = res.data.map((u: any) => ({
-          label: u.username,
-          value: u.id
-        }));
-        this.cdr.markForCheck();
-      }
-    }
-  });
-}
+    this.api.getUsuarios().subscribe({
+      next: (res: any) => {
+        if (res.statusCode === 200) {
+          this.usuariosDisponibles = res.data.map((u: any) => ({
+            id: u.id,
+            nombre: u.nombre_completo,
+            usuario: u.username,
+            email: u.email,
+          }));
+          this.usuariosOpciones = res.data.map((u: any) => ({
+            label: u.username,
+            value: u.id,
+          }));
+          this.cdr.markForCheck();
+        }
+      },
+    });
+  }
 
   abrirNuevo() {
     this.grupoActual = this.grupoVacio();
@@ -180,36 +203,48 @@ export class GruposComponent implements OnInit {
     }
     const user = JSON.parse(localStorage.getItem('erp_user') || '{}');
     if (this.esEdicion) {
-      this.api.updateGrupo(this.grupoActual.id, {
-        nombre: this.grupoActual.nombre,
-        descripcion: this.grupoActual.descripcion,
-        nivel: this.grupoActual.nivel
-      }).subscribe({
-        next: () => {
-          this.msg.add({ severity: 'success', summary: 'Actualizado', detail: 'Grupo actualizado' });
-          this.dialogGrupo = false;
-          this.cargarGrupos();
-        },
-        error: () => {
-          this.msg.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar' });
-        }
-      });
+      this.api
+        .updateGrupo(this.grupoActual.id, {
+          nombre: this.grupoActual.nombre,
+          descripcion: this.grupoActual.descripcion,
+          nivel: this.grupoActual.nivel,
+        })
+        .subscribe({
+          next: () => {
+            this.msg.add({
+              severity: 'success',
+              summary: 'Actualizado',
+              detail: 'Grupo actualizado',
+            });
+            this.dialogGrupo = false;
+            this.cargarGrupos();
+          },
+          error: () => {
+            this.msg.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar' });
+          },
+        });
     } else {
-      this.api.createGrupo({
-        nombre: this.grupoActual.nombre,
-        descripcion: this.grupoActual.descripcion,
-        nivel: this.grupoActual.nivel,
-        creador_id: user.id
-      }).subscribe({
-        next: () => {
-          this.msg.add({ severity: 'success', summary: 'Creado', detail: 'Grupo creado' });
-          this.dialogGrupo = false;
-          this.cargarGrupos();
-        },
-        error: () => {
-          this.msg.add({ severity: 'error', summary: 'Error', detail: 'No se pudo crear el grupo' });
-        }
-      });
+      this.api
+        .createGrupo({
+          nombre: this.grupoActual.nombre,
+          descripcion: this.grupoActual.descripcion,
+          nivel: this.grupoActual.nivel,
+          creador_id: user.id,
+        })
+        .subscribe({
+          next: () => {
+            this.msg.add({ severity: 'success', summary: 'Creado', detail: 'Grupo creado' });
+            this.dialogGrupo = false;
+            this.cargarGrupos();
+          },
+          error: () => {
+            this.msg.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudo crear el grupo',
+            });
+          },
+        });
     }
   }
 
@@ -223,9 +258,17 @@ export class GruposComponent implements OnInit {
           next: () => {
             this.msg.add({ severity: 'warn', summary: 'Eliminado', detail: 'Grupo eliminado' });
             this.cargarGrupos();
-          }
+          },
+          error: (err) => {
+            console.log('Error eliminar:', err);
+            this.msg.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudo eliminar el grupo',
+            });
+          },
         });
-      }
+      },
     });
   }
 
@@ -238,10 +281,11 @@ export class GruposComponent implements OnInit {
   get usuariosFiltrados(): Miembro[] {
     if (!this.busquedaMiembro) return this.usuariosDisponibles;
     const b = this.busquedaMiembro.toLowerCase();
-    return this.usuariosDisponibles.filter(u =>
-      u.nombre.toLowerCase().includes(b) ||
-      u.usuario.toLowerCase().includes(b) ||
-      u.email.toLowerCase().includes(b)
+    return this.usuariosDisponibles.filter(
+      (u) =>
+        u.nombre.toLowerCase().includes(b) ||
+        u.usuario.toLowerCase().includes(b) ||
+        u.email.toLowerCase().includes(b),
     );
   }
 
@@ -253,12 +297,20 @@ export class GruposComponent implements OnInit {
     if (!this.grupoDetalle || this.esMiembro(usuario)) return;
     this.api.addMiembro(this.grupoDetalle.id, usuario.id).subscribe({
       next: () => {
-        this.msg.add({ severity: 'success', summary: 'Agregado', detail: `${usuario.nombre} agregado` });
+        this.msg.add({
+          severity: 'success',
+          summary: 'Agregado',
+          detail: `${usuario.nombre} agregado`,
+        });
         this.cargarGrupos();
       },
       error: () => {
-        this.msg.add({ severity: 'error', summary: 'Error', detail: 'No se pudo agregar el miembro' });
-      }
+        this.msg.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'No se pudo agregar el miembro',
+        });
+      },
     });
   }
 
@@ -271,49 +323,62 @@ export class GruposComponent implements OnInit {
       accept: () => {
         this.api.removeMiembro(this.grupoDetalle!.id, miembro.id).subscribe({
           next: () => {
-            this.msg.add({ severity: 'warn', summary: 'Eliminado', detail: `${miembro.nombre} eliminado` });
+            this.msg.add({
+              severity: 'warn',
+              summary: 'Eliminado',
+              detail: `${miembro.nombre} eliminado`,
+            });
             this.cargarGrupos();
-          }
+          },
         });
-      }
+      },
     });
   }
 
   abrirCrearTicket(grupo: Grupo) {
     this.grupoTicket = grupo;
     this.nuevoTicket = { ...this.ticketVacio(), grupoId: grupo.id };
+    this.usuariosOpciones = grupo.miembros.map((m) => ({
+      label: m.usuario,
+      value: m.id,
+    }));
     this.dialogTicket = true;
   }
 
   crearTicket() {
-  if (!this.nuevoTicket.titulo) {
-    this.msg.add({ severity: 'error', summary: 'Error', detail: 'El título es obligatorio' });
-    return;
-  }
-
-  const user = JSON.parse(localStorage.getItem('erp_user') || '{}');
-
-  const ticketData = {
-    titulo: this.nuevoTicket.titulo,
-    descripcion: this.nuevoTicket.descripcion,
-    grupo_id: this.grupoTicket?.id,
-    estado_id: '7f9b16bb-a276-4e31-9814-0be095d4ec56', // pendiente
-    prioridad_id: '6bb36b40-744f-4482-94d1-a2550680ae85', // media
-    autor_id: user.id,
-    asignado_id: user.id,
-    fecha_final: this.nuevoTicket.fechaLimite || null
-  };
-
-  this.api.createTicket(ticketData).subscribe({
-    next: () => {
-      this.dialogTicket = false;
-      this.nuevoTicket = this.ticketVacio();
-      this.msg.add({ severity: 'success', summary: 'Creado', detail: 'Ticket creado correctamente' });
-      this.cargarGrupos();
-    },
-    error: () => {
-      this.msg.add({ severity: 'error', summary: 'Error', detail: 'No se pudo crear el ticket' });
+    if (!this.nuevoTicket.titulo) {
+      this.msg.add({ severity: 'error', summary: 'Error', detail: 'El título es obligatorio' });
+      return;
     }
-  });
-}
+
+    const user = JSON.parse(localStorage.getItem('erp_user') || '{}');
+
+    const ticketData = {
+      titulo: this.nuevoTicket.titulo,
+      descripcion: this.nuevoTicket.descripcion,
+      grupo_id: this.grupoTicket?.id,
+      estado_id: '7f9b16bb-a276-4e31-9814-0be095d4ec56',
+      prioridad_id: '6bb36b40-744f-4482-94d1-a2550680ae85',
+      autor_id: user.id,
+      asignado_id: this.nuevoTicket.asignadoA || null,
+      fecha_final: this.nuevoTicket.fechaLimite || null,
+    };
+
+    this.api.createTicket(ticketData).subscribe({
+      next: () => {
+        this.dialogTicket = false;
+        this.nuevoTicket = this.ticketVacio();
+        this.msg.add({
+          severity: 'success',
+          summary: 'Creado',
+          detail: 'Ticket creado correctamente',
+        });
+        this.cargarGrupos();
+      },
+      error: (err) => {
+        console.log('Error:', err);
+        this.msg.add({ severity: 'error', summary: 'Error', detail: 'No se pudo crear el ticket' });
+      },
+    });
+  }
 }

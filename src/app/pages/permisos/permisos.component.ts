@@ -34,16 +34,21 @@ interface GrupoPermiso {
   selector: 'app-permisos',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, ButtonModule, CardModule,
-    TagModule, DividerModule, ToastModule, TooltipModule,
-    ToggleSwitchModule
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    CardModule,
+    TagModule,
+    DividerModule,
+    ToastModule,
+    TooltipModule,
+    ToggleSwitchModule,
   ],
   providers: [MessageService],
   templateUrl: './permisos.component.html',
-  styleUrl: './permisos.component.css'
+  styleUrl: './permisos.component.css',
 })
 export class PermisosComponent implements OnInit {
-
   private appRef = inject(ApplicationRef);
 
   usuarioSeleccionado = signal<Usuario | null>(null);
@@ -57,47 +62,50 @@ export class PermisosComponent implements OnInit {
       modulo: 'Dashboard',
       icono: 'pi-chart-bar',
       color: '#3b82f6',
-      permisos: ['dashboard.view']
+      permisos: ['dashboard.view'],
     },
     {
       modulo: 'Grupos',
       icono: 'pi-users',
       color: '#8b5cf6',
-      permisos: ['grupos.view', 'grupos.crear', 'grupos.editar', 'grupos.eliminar']
+      permisos: ['grupos.view', 'grupos.crear', 'grupos.editar', 'grupos.eliminar'],
     },
     {
       modulo: 'Tickets',
       icono: 'pi-ticket',
       color: '#f59e0b',
-      permisos: ['tickets.view', 'tickets.crear', 'ticket.editar', 'ticket.eliminar']
+      permisos: ['tickets.view', 'tickets.crear', 'ticket.editar', 'ticket.eliminar'],
     },
     {
       modulo: 'Usuario',
       icono: 'pi-id-card',
       color: '#10b981',
-      permisos: ['usuario.view', 'usuario.editar', 'usuario.eliminar']
+      permisos: ['usuario.view', 'usuario.editar', 'usuario.eliminar'],
     },
     {
       modulo: 'Mi Panel',
       icono: 'pi-home',
       color: '#ef4444',
       permisos: [
-        'mipanel.view', 'ticket.ver-asignados',
-        'ticket.editar-descripcion', 'ticket.finalizar', 'ticket.editar-estado'
-      ]
+        'mipanel.view',
+        'ticket.ver-asignados',
+        'ticket.editar-descripcion',
+        'ticket.finalizar',
+        'ticket.editar-estado',
+      ],
     },
     {
       modulo: 'Permisos',
       icono: 'pi-shield',
       color: '#64748b',
-      permisos: ['permisos.view']
-    }
+      permisos: ['permisos.view'],
+    },
   ];
 
   constructor(
     private permissionsService: PermissionsService,
     private api: ApiService,
-    private msg: MessageService
+    private msg: MessageService,
   ) {}
 
   ngOnInit() {
@@ -113,7 +121,7 @@ export class PermisosComponent implements OnInit {
             this.permisosMap[p.nombre] = p.id;
           });
         }
-      }
+      },
     });
   }
 
@@ -129,10 +137,10 @@ export class PermisosComponent implements OnInit {
             email: u.email,
             avatar: u.nombre_completo?.substring(0, 2).toUpperCase(),
             tipo: u.permisos_globales?.length > 5 ? 'admin' : 'cliente',
-            permisos_globales: u.permisos_globales ?? []
+            permisos_globales: u.permisos_globales ?? [],
           }));
 
-          this.usuarios.forEach(u => {
+          this.usuarios.forEach((u) => {
             this.permisosEditables[u.id] = [...u.permisos_globales];
           });
 
@@ -141,7 +149,7 @@ export class PermisosComponent implements OnInit {
       },
       error: () => {
         this.cargando = false;
-      }
+      },
     });
   }
 
@@ -163,7 +171,7 @@ export class PermisosComponent implements OnInit {
     const tienePermiso = lista.includes(permisoId);
 
     if (tienePermiso) {
-      this.permisosEditables[usuario.id] = lista.filter(p => p !== permisoId);
+      this.permisosEditables[usuario.id] = lista.filter((p) => p !== permisoId);
     } else {
       this.permisosEditables[usuario.id] = [...lista, permisoId];
     }
@@ -173,7 +181,7 @@ export class PermisosComponent implements OnInit {
         this.msg.add({
           severity: tienePermiso ? 'warn' : 'success',
           summary: tienePermiso ? 'Permiso removido' : 'Permiso agregado',
-          detail: `${permisoNombre} — ${usuario.nombre}`
+          detail: `${permisoNombre} — ${usuario.nombre}`,
         });
         this.appRef.tick();
       },
@@ -181,9 +189,9 @@ export class PermisosComponent implements OnInit {
         this.msg.add({
           severity: 'error',
           summary: 'Error',
-          detail: 'No se pudo actualizar el permiso'
+          detail: 'No se pudo actualizar el permiso',
         });
-      }
+      },
     });
   }
 

@@ -1,7 +1,7 @@
 .sidebar {
   width: 240px;
   min-height: 100vh;
-  background: #B3A4C7;
+  background: #b3a4c7;
   color: white;
   display: flex;
   flex-direction: column;
@@ -26,7 +26,8 @@
   padding: 1rem 0;
 }
 
-.sidebar-nav a, .sidebar-footer a {
+.sidebar-nav a,
+.sidebar-footer a {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -37,13 +38,14 @@
   font-size: 0.95rem;
 }
 
-.sidebar-nav a:hover, .sidebar-footer a:hover {
-  background: #B3A4C7;
+.sidebar-nav a:hover,
+.sidebar-footer a:hover {
+  background: #b3a4c7;
   color: #191919;
 }
 
 .sidebar-nav a.active {
-  background: #B3A4C7;
+  background: #b3a4c7;
   color: #030303;
 }
 

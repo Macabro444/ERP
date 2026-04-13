@@ -9,24 +9,23 @@ import { ApiService } from '../../services/api.service';
   standalone: true,
   imports: [RouterLink, RouterLinkActive, HasPermissionDirective],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css'
+  styleUrl: './sidebar.component.css',
 })
 export class SidebarComponent {
   constructor(
     private permissions: PermissionsService,
     private router: Router,
-    private api: ApiService
+    private api: ApiService,
   ) {}
 
   cerrarSesion() {
-    // Limpiar todo
+
     this.api.clearToken();
     this.permissions.clearPermissions();
     localStorage.removeItem('erp_user');
     localStorage.removeItem('erp_permisos');
     sessionStorage.clear();
 
-    // Redirigir y reemplazar historial para que no pueda regresar
     window.location.replace('/login');
   }
 }

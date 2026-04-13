@@ -27,7 +27,7 @@ export class LoginComponent {
     private router: Router,
     private permissions: PermissionsService,
     private api: ApiService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   onLogoClick() {
@@ -50,29 +50,28 @@ export class LoginComponent {
     this.cdr.markForCheck();
 
     this.api.login(this.email, this.password).subscribe({
-    next: (res: any) => {
-  console.log('Respuesta del gateway:', res);
-  this.loading = false;
-  if (res.statusCode === 200) {
-    this.api.saveToken(res.data.token);
-    localStorage.setItem('erp_user', JSON.stringify(res.data.user));
-    const permisos = res.data.user.permisos ?? [];
-    this.permissions.setPermissionsFromArray(permisos);
+      next: (res: any) => {
+        console.log('Respuesta del gateway:', res);
+        this.loading = false;
+        if (res.statusCode === 200) {
+          this.api.saveToken(res.data.token);
+          localStorage.setItem('erp_user', JSON.stringify(res.data.user));
+          const permisos = res.data.user.permisos ?? [];
+          this.permissions.setPermissionsFromArray(permisos);
 
-    // Redirigir con window.location para evitar problema zoneless
-    if (permisos.includes('dashboard.view')) {
-      window.location.href = '/app/dashboard';
-    } else {
-      window.location.href = '/app/mi-panel';
-    }
-  }
-  this.cdr.markForCheck();
-},
+          if (permisos.includes('dashboard.view')) {
+            window.location.href = '/app/dashboard';
+          } else {
+            window.location.href = '/app/mi-panel';
+          }
+        }
+        this.cdr.markForCheck();
+      },
       error: (err: any) => {
         this.loading = false;
         this.errorMsg = 'Correo o contraseña incorrectos';
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 }

@@ -4,36 +4,30 @@ const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY  // ← cambia ANON_KEY por SERVICE_KEY
+  process.env.SUPABASE_SERVICE_KEY,
 );
 
-// GET /usuarios/perfil/:id - obtener perfil propio
 router.get('/perfil/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const { data, error } = await supabase
-      .from('usuarios')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { data, error } = await supabase.from('usuarios').select('*').eq('id', id).single();
 
     if (error) throw error;
 
     return res.status(200).json({
       statusCode: 200,
       intOpCode: 'SxUS200',
-      data
+      data,
     });
   } catch (err) {
     return res.status(500).json({
       statusCode: 500,
       intOpCode: 'SxUS500',
-      data: { message: 'Error al obtener perfil' }
+      data: { message: 'Error al obtener perfil' },
     });
   }
 });
 
-// GET /usuarios - listar todos
 router.get('/', async (req, res) => {
   try {
     const { data, error } = await supabase
@@ -45,18 +39,17 @@ router.get('/', async (req, res) => {
     return res.status(200).json({
       statusCode: 200,
       intOpCode: 'SxUS200',
-      data
+      data,
     });
   } catch (err) {
     return res.status(500).json({
       statusCode: 500,
       intOpCode: 'SxUS500',
-      data: { message: 'Error al obtener usuarios' }
+      data: { message: 'Error al obtener usuarios' },
     });
   }
 });
 
-// PATCH /usuarios/:id - actualizar perfil o permisos
 router.patch('/:id', async (req, res) => {
   const { id } = req.params;
   const cambios = req.body;
@@ -74,13 +67,13 @@ router.patch('/:id', async (req, res) => {
     return res.status(200).json({
       statusCode: 200,
       intOpCode: 'SxUS200',
-      data
+      data,
     });
   } catch (err) {
     return res.status(500).json({
       statusCode: 500,
       intOpCode: 'SxUS500',
-      data: { message: 'Error al actualizar usuario' }
+      data: { message: 'Error al actualizar usuario' },
     });
   }
 });

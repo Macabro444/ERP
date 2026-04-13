@@ -1,134 +1,136 @@
 <p-toast />
 
 <div class="bienvenida" style="margin-bottom: 1.5rem">
-  <p-avatar [label]="cliente.nombre ? cliente.nombre.substring(0,2).toUpperCase() : '?'" size="xlarge" shape="circle" />
+  <p-avatar
+    [label]="cliente.nombre ? cliente.nombre.substring(0, 2).toUpperCase() : '?'"
+    size="xlarge"
+    shape="circle"
+  />
   <div>
     <h2>Hola de nuevo, {{ cliente.nombre }}</h2>
     <span style="color: #64748b">@{{ cliente.usuario }} · {{ cliente.email }}</span>
 
-    <div style="margin-top: 0.8rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap">
+    <div
+      style="margin-top: 0.8rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap"
+    >
       <p-tag icon="pi pi-users" [value]="cliente.departamento" severity="info" />
     </div>
   </div>
 </div>
 
-  <div class="stats-grid">
-    <div class="stat-card total">
-      <div>
-        <span class="stat-label">MIS TICKETS</span>
-        <h2>{{ stats.total }}</h2>
-      </div>
-      <i class="pi pi-ticket"></i>
+<div class="stats-grid">
+  <div class="stat-card total">
+    <div>
+      <span class="stat-label">MIS TICKETS</span>
+      <h2>{{ stats.total }}</h2>
     </div>
-    <div class="stat-card pendiente">
-      <div>
-        <span class="stat-label">PENDIENTES</span>
-        <h2>{{ stats.pendiente }}</h2>
-      </div>
-      <i class="pi pi-clock"></i>
-    </div>
-    <div class="stat-card progreso">
-      <div>
-        <span class="stat-label">EN PROGRESO</span>
-        <h2>{{ stats.enProgreso }}</h2>
-      </div>
-      <i class="pi pi-spin pi-spinner"></i>
-    </div>
-    <div class="stat-card finalizado">
-      <div>
-        <span class="stat-label">FINALIZADOS</span>
-        <h2>{{ stats.finalizado }}</h2>
-      </div>
-      <i class="pi pi-check-circle"></i>
-    </div>
+    <i class="pi pi-ticket"></i>
   </div>
+  <div class="stat-card pendiente">
+    <div>
+      <span class="stat-label">PENDIENTES</span>
+      <h2>{{ stats.pendiente }}</h2>
+    </div>
+    <i class="pi pi-clock"></i>
+  </div>
+  <div class="stat-card progreso">
+    <div>
+      <span class="stat-label">EN PROGRESO</span>
+      <h2>{{ stats.enProgreso }}</h2>
+    </div>
+    <i class="pi pi-spin pi-spinner"></i>
+  </div>
+  <div class="stat-card finalizado">
+    <div>
+      <span class="stat-label">FINALIZADOS</span>
+      <h2>{{ stats.finalizado }}</h2>
+    </div>
+    <i class="pi pi-check-circle"></i>
+  </div>
+</div>
 
-  <p-table
-    [value]="misTickets"
-    [paginator]="true"
-    [rows]="5"
-    styleClass="p-datatable-striped p-datatable-gridlines"
-  >
-    <ng-template pTemplate="header">
-      <tr>
-        <th>Título</th>
-        <th>Estado</th>
-        <th>Prioridad</th>
-        <th style="white-space: nowrap">Fecha Límite</th>
-        <th>Acciones</th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-ticket>
-      <tr>
-        <td>
-          <div style="font-weight: 500">{{ ticket.titulo }}</div>
-          <div style="font-size: 0.8rem; color: #94a3b8">
-            {{ ticket.descripcion | slice: 0 : 50
-            }}{{ ticket.descripcion.length > 50 ? '...' : '' }}
-          </div>
-        </td>
-        <td><p-tag [value]="ticket.estado" [severity]="severidadEstado(ticket.estado)" /></td>
-        <td>
-          <p-tag [value]="ticket.prioridad" [severity]="severidadPrioridad(ticket.prioridad)" />
-        </td>
-        <td style="white-space: nowrap">{{ ticket.fechaLimite }}</td>
-        <td>
-          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
+<p-table
+  [value]="misTickets"
+  [paginator]="true"
+  [rows]="5"
+  styleClass="p-datatable-striped p-datatable-gridlines"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Título</th>
+      <th>Estado</th>
+      <th>Prioridad</th>
+      <th style="white-space: nowrap">Fecha Límite</th>
+      <th>Acciones</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-ticket>
+    <tr>
+      <td>
+        <div style="font-weight: 500">{{ ticket.titulo }}</div>
+        <div style="font-size: 0.8rem; color: #94a3b8">
+          {{ ticket.descripcion | slice: 0 : 50 }}{{ ticket.descripcion.length > 50 ? '...' : '' }}
+        </div>
+      </td>
+      <td><p-tag [value]="ticket.estado" [severity]="severidadEstado(ticket.estado)" /></td>
+      <td>
+        <p-tag [value]="ticket.prioridad" [severity]="severidadPrioridad(ticket.prioridad)" />
+      </td>
+      <td style="white-space: nowrap">{{ ticket.fechaLimite }}</td>
+      <td>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap">
+          <p-button
+            icon="pi pi-eye"
+            severity="info"
+            pTooltip="Ver detalle"
+            (onClick)="verDetalle(ticket)"
+          />
+
+          @if (permissions.hasPermission('ticket.editar-descripcion')) {
             <p-button
-              icon="pi pi-eye"
-              severity="info"
-              pTooltip="Ver detalle"
-              (onClick)="verDetalle(ticket)"
+              icon="pi pi-pencil"
+              severity="warn"
+              pTooltip="Editar descripción"
+              (onClick)="abrirEditar(ticket)"
             />
+          }
 
-            @if (permissions.hasPermission('ticket.editar-descripcion')) {
-              <p-button
-                icon="pi pi-pencil"
-                severity="warn"
-                pTooltip="Editar descripción"
-                (onClick)="abrirEditar(ticket)"
-              />
-            }
+          @if (
+            permissions.hasPermission('ticket.editar-estado') && ticket.estado !== 'finalizado'
+          ) {
+            <p-button
+              icon="pi pi-refresh"
+              severity="secondary"
+              pTooltip="Cambiar estado"
+              (onClick)="abrirCambiarEstado(ticket)"
+            />
+          }
 
-            @if (
-              permissions.hasPermission('ticket.editar-estado') && ticket.estado !== 'finalizado'
-            ) {
-              <p-button
-                icon="pi pi-refresh"
-                severity="secondary"
-                pTooltip="Cambiar estado"
-                (onClick)="abrirCambiarEstado(ticket)"
-              />
-            }
+          @if (permissions.hasPermission('ticket.finalizar') && ticket.estado !== 'finalizado') {
+            <p-button
+              icon="pi pi-check"
+              severity="success"
+              pTooltip="Finalizar ticket"
+              (onClick)="finalizarTicket(ticket)"
+            />
+          }
 
-            @if (permissions.hasPermission('ticket.finalizar') && ticket.estado !== 'finalizado') {
-              <p-button
-                icon="pi pi-check"
-                severity="success"
-                pTooltip="Finalizar ticket"
-                (onClick)="finalizarTicket(ticket)"
-              />
-            }
-
-            @if (ticket.estado === 'finalizado') {
-              <p-tag value="Finalizado" severity="success" />
-            }
-          </div>
-        </td>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="emptymessage">
-      <tr>
-        <td colspan="5" style="text-align: center; padding: 2rem; color: #94a3b8">
-          <i
-            class="pi pi-ticket"
-            style="font-size: 2rem; display: block; margin-bottom: 0.5rem"
-          ></i>
-          No tienes tickets asignados
-        </td>
-      </tr>
-    </ng-template>
-  </p-table>
+          @if (ticket.estado === 'finalizado') {
+            <p-tag value="Finalizado" severity="success" />
+          }
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="5" style="text-align: center; padding: 2rem; color: #94a3b8">
+        <i class="pi pi-ticket" style="font-size: 2rem; display: block; margin-bottom: 0.5rem"></i>
+        No tienes tickets asignados
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
 
 <p-dialog
   [(visible)]="dialogDetalle"
@@ -218,6 +220,7 @@
       [(ngModel)]="nuevoEstado"
       [options]="estadoOpciones"
       placeholder="Selecciona estado"
+      appendTo="body"
       style="width: 100%"
     />
   </div>

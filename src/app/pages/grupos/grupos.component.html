@@ -4,8 +4,8 @@
 <div class="page">
   <div class="page-header">
     <ng-container *ifHasPermission="'grupos.crear'">
-  <p-button label="Nuevo Grupo" icon="pi pi-plus" severity="success" (onClick)="abrirNuevo()" />
-</ng-container>
+      <p-button label="Nuevo Grupo" icon="pi pi-plus" severity="success" (onClick)="abrirNuevo()" />
+    </ng-container>
   </div>
 
   <div class="total-card">
@@ -61,13 +61,13 @@
         <td>
           <div style="display: flex; gap: 0.5rem">
             <ng-container *ifHasPermission="'tickets.crear'">
-  <p-button
-    icon="pi pi-ticket"
-    severity="success"
-    pTooltip="Nuevo Ticket"
-    (onClick)="abrirCrearTicket(grupo)"
-  />
-</ng-container>
+              <p-button
+                icon="pi pi-ticket"
+                severity="success"
+                pTooltip="Nuevo Ticket"
+                (onClick)="abrirCrearTicket(grupo)"
+              />
+            </ng-container>
             <p-button
               icon="pi pi-users"
               severity="info"
@@ -98,7 +98,6 @@
     </ng-template>
   </p-table>
 </div>
-
 <p-dialog
   [(visible)]="dialogGrupo"
   [header]="esEdicion ? 'Editar Grupo' : 'Nuevo Grupo'"
@@ -119,11 +118,12 @@
       style="width: 100%"
     />
     <p-select
-  [(ngModel)]="grupoActual.nivel"
-  [options]="nivelOpciones"
-  placeholder="Selecciona nivel"
-  style="width: 100%"
-/>
+      [(ngModel)]="grupoActual.nivel"
+      [options]="nivelOpciones"
+      placeholder="Selecciona nivel"
+      appendTo="body"
+      style="width: 100%"
+    />
   </div>
   <ng-template pTemplate="footer">
     <p-button label="Cancelar" severity="secondary" (onClick)="dialogGrupo = false" />
