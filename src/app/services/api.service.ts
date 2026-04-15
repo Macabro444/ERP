@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private gatewayUrl = 'https://erp-production-e162.up.railway.app';
+  private gatewayUrl = 'http://localhost:4000';
 
   constructor(private http: HttpClient) {}
 
@@ -51,7 +51,9 @@ export class ApiService {
 
   deleteGrupo(id: string): Observable<any> {
     return this.http.delete(`${this.gatewayUrl}/grupos/${id}`, {
-      headers: new HttpHeaders({ Authorization: `Bearer ${this.getToken()}` }),
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${this.getToken()}`,
+      }),
     });
   }
 
@@ -63,12 +65,6 @@ export class ApiService {
     );
   }
 
-  removeMiembro(grupoId: string, usuarioId: string): Observable<any> {
-    return this.http.delete(`${this.gatewayUrl}/grupos/${grupoId}/miembros/${usuarioId}`, {
-      headers: this.getHeaders(),
-    });
-  }
-
   getTickets(): Observable<any> {
     return this.http.get(`${this.gatewayUrl}/tickets`, { headers: this.getHeaders() });
   }
@@ -78,12 +74,16 @@ export class ApiService {
   }
 
   updateTicket(id: string, data: any): Observable<any> {
-    return this.http.patch(`${this.gatewayUrl}/tickets/${id}`, data, { headers: this.getHeaders() });
+    return this.http.patch(`${this.gatewayUrl}/tickets/${id}`, data, {
+      headers: this.getHeaders(),
+    });
   }
 
   deleteTicket(id: string): Observable<any> {
     return this.http.delete(`${this.gatewayUrl}/tickets/${id}`, {
-      headers: new HttpHeaders({ Authorization: `Bearer ${this.getToken()}` }),
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${this.getToken()}`,
+      }),
     });
   }
 
@@ -109,6 +109,12 @@ export class ApiService {
     );
   }
 
+  removeMiembro(grupoId: string, usuarioId: string): Observable<any> {
+    return this.http.delete(`${this.gatewayUrl}/grupos/${grupoId}/miembros/${usuarioId}`, {
+      headers: this.getHeaders(),
+    });
+  }
+
   getEstados(): Observable<any> {
     return this.http.get(`${this.gatewayUrl}/estados`, { headers: this.getHeaders() });
   }
@@ -122,6 +128,16 @@ export class ApiService {
   }
 
   updatePerfil(id: string, data: any): Observable<any> {
-    return this.http.patch(`${this.gatewayUrl}/usuarios/${id}`, data, { headers: this.getHeaders() });
+    return this.http.patch(`${this.gatewayUrl}/usuarios/${id}`, data, {
+      headers: this.getHeaders(),
+    });
+  }
+
+  deleteUsuario(id: string): Observable<any> {
+    return this.http.delete(`${this.gatewayUrl}/usuarios/${id}`, {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${this.getToken()}`,
+      }),
+    });
   }
 }

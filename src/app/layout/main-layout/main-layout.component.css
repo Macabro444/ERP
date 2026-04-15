@@ -8,3 +8,15 @@
   background: #f1f5f9;
   padding: 2rem;
 }
+
+.sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background: #b3a4c7;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  height: 100%;          /* ← agrega esto */
+  align-self: stretch;   /* ← y esto */
+}

@@ -61,3 +61,15 @@
   font-size: 0.75rem;
   padding: 0.5rem;
 }
+
+.sidebar {
+  width: 240px;
+  height: 100vh;        
+  background: #b3a4c7;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: sticky;     
+  top: 0;               
+}

@@ -1,7 +1,6 @@
 const { authMiddleware } = require('../middleware/auth');
 
 async function proxyRoutes(fastify) {
-
   fastify.post('/auth/register', async (request, reply) => {
     const response = await fetch(`${process.env.USER_SERVICE_URL}/auth/register`, {
       method: 'POST',
@@ -203,6 +202,17 @@ async function proxyRoutes(fastify) {
   fastify.get('/permisos', { preHandler: authMiddleware }, async (request, reply) => {
     const response = await fetch(`${process.env.USER_SERVICE_URL}/permisos`, {
       headers: { Authorization: request.headers['authorization'] },
+    });
+    const data = await response.json();
+    return reply.status(response.status).send(data);
+  });
+
+  fastify.delete('/usuarios/:id', { preHandler: authMiddleware }, async (request, reply) => {
+    const response = await fetch(`${process.env.USER_SERVICE_URL}/usuarios/${request.params.id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: request.headers['authorization'],
+      },
     });
     const data = await response.json();
     return reply.status(response.status).send(data);

@@ -180,13 +180,29 @@ export class UsuarioComponent implements OnInit {
       rejectLabel: 'Cancelar',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
-        this.api.clearToken();
-        this.permissions.clearPermissions();
-        localStorage.removeItem('erp_user');
-        this.msg.add({ severity: 'warn', summary: 'Cuenta eliminada', detail: 'Redirigiendo...' });
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 2000);
+        this.api.deleteUsuario(this.perfil.id).subscribe({
+          next: () => {
+            this.api.clearToken();
+            this.permissions.clearPermissions();
+            localStorage.removeItem('erp_user');
+            localStorage.removeItem('erp_permisos');
+            this.msg.add({
+              severity: 'warn',
+              summary: 'Cuenta eliminada',
+              detail: 'Redirigiendo...',
+            });
+            setTimeout(() => {
+              window.location.replace('/login');
+            }, 2000);
+          },
+          error: () => {
+            this.msg.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'No se pudo eliminar la cuenta',
+            });
+          },
+        });
       },
     });
   }

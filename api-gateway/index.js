@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 4000;
 
 fastify.register(cors, {
   origin: '*',
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT']
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
 });
 
 const requestCounts = {};
@@ -27,7 +27,7 @@ fastify.addHook('onRequest', async (request, reply) => {
         return reply.status(429).send({
           statusCode: 429,
           intOpCode: 'SxGW429',
-          data: { message: 'Too many requests' }
+          data: { message: 'Too many requests' },
         });
       }
     }
@@ -45,10 +45,22 @@ fastify.get('/health', async (request, reply) => {
       services: {
         userService: process.env.USER_SERVICE_URL,
         groupsService: process.env.GROUPS_SERVICE_URL,
-        ticketsService: process.env.TICKETS_SERVICE_URL
-      }
-    }
+        ticketsService: process.env.TICKETS_SERVICE_URL,
+      },
+    },
   };
+});
+
+fastify.addContentTypeParser('application/json', { parseAs: 'string' }, function (req, body, done) {
+  if (!body || body.length === 0) {
+    done(null, {});
+    return;
+  }
+  try {
+    done(null, JSON.parse(body));
+  } catch (err) {
+    done(err);
+  }
 });
 
 fastify.register(proxyRoutes);
