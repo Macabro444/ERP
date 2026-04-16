@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -8,25 +8,16 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  private getHeaders(): HttpHeaders {
-    const token = this.getToken();
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    });
-  }
-
   saveToken(token: string): void {
-    document.cookie = `erp_token=${token}; path=/; max-age=3600; SameSite=Strict`;
+    sessionStorage.setItem('erp_token', token);
   }
 
   getToken(): string | null {
-    const match = document.cookie.match(/erp_token=([^;]+)/);
-    return match ? match[1] : null;
+    return sessionStorage.getItem('erp_token');
   }
 
   clearToken(): void {
-    document.cookie = 'erp_token=; path=/; max-age=0';
+    sessionStorage.removeItem('erp_token');
   }
 
   register(data: any): Observable<any> {
@@ -38,106 +29,86 @@ export class ApiService {
   }
 
   getGrupos(): Observable<any> {
-    return this.http.get(`${this.gatewayUrl}/grupos`, { headers: this.getHeaders() });
+    return this.http.get(`${this.gatewayUrl}/grupos`);
+  }
+
+  getGrupoUsuario(userId: string): Observable<any> {
+    return this.http.get(`${this.gatewayUrl}/grupos/usuario/${userId}`);
   }
 
   createGrupo(data: any): Observable<any> {
-    return this.http.post(`${this.gatewayUrl}/grupos`, data, { headers: this.getHeaders() });
+    return this.http.post(`${this.gatewayUrl}/grupos`, data);
   }
 
   updateGrupo(id: string, data: any): Observable<any> {
-    return this.http.patch(`${this.gatewayUrl}/grupos/${id}`, data, { headers: this.getHeaders() });
+    return this.http.patch(`${this.gatewayUrl}/grupos/${id}`, data);
   }
 
   deleteGrupo(id: string): Observable<any> {
-    return this.http.delete(`${this.gatewayUrl}/grupos/${id}`, {
-      headers: new HttpHeaders({
-        Authorization: `Bearer ${this.getToken()}`,
-      }),
-    });
+    return this.http.delete(`${this.gatewayUrl}/grupos/${id}`);
   }
 
   addMiembro(grupoId: string, usuarioId: string): Observable<any> {
-    return this.http.post(
-      `${this.gatewayUrl}/grupos/${grupoId}/miembros`,
-      { usuario_id: usuarioId },
-      { headers: this.getHeaders() },
-    );
-  }
-
-  getTickets(): Observable<any> {
-    return this.http.get(`${this.gatewayUrl}/tickets`, { headers: this.getHeaders() });
-  }
-
-  createTicket(data: any): Observable<any> {
-    return this.http.post(`${this.gatewayUrl}/tickets`, data, { headers: this.getHeaders() });
-  }
-
-  updateTicket(id: string, data: any): Observable<any> {
-    return this.http.patch(`${this.gatewayUrl}/tickets/${id}`, data, {
-      headers: this.getHeaders(),
+    return this.http.post(`${this.gatewayUrl}/grupos/${grupoId}/miembros`, {
+      usuario_id: usuarioId,
     });
-  }
-
-  deleteTicket(id: string): Observable<any> {
-    return this.http.delete(`${this.gatewayUrl}/tickets/${id}`, {
-      headers: new HttpHeaders({
-        Authorization: `Bearer ${this.getToken()}`,
-      }),
-    });
-  }
-
-  addComentario(ticketId: string, data: any): Observable<any> {
-    return this.http.post(`${this.gatewayUrl}/tickets/${ticketId}/comentarios`, data, {
-      headers: this.getHeaders(),
-    });
-  }
-
-  getUsuarios(): Observable<any> {
-    return this.http.get(`${this.gatewayUrl}/usuarios`, { headers: this.getHeaders() });
-  }
-
-  getPermisos(): Observable<any> {
-    return this.http.get(`${this.gatewayUrl}/permisos`, { headers: this.getHeaders() });
-  }
-
-  updatePermisos(usuarioId: string, permisosIds: string[]): Observable<any> {
-    return this.http.patch(
-      `${this.gatewayUrl}/usuarios/${usuarioId}`,
-      { permisos_globales: permisosIds },
-      { headers: this.getHeaders() },
-    );
   }
 
   removeMiembro(grupoId: string, usuarioId: string): Observable<any> {
-    return this.http.delete(`${this.gatewayUrl}/grupos/${grupoId}/miembros/${usuarioId}`, {
-      headers: this.getHeaders(),
+    return this.http.delete(`${this.gatewayUrl}/grupos/${grupoId}/miembros/${usuarioId}`);
+  }
+
+  getTickets(): Observable<any> {
+    return this.http.get(`${this.gatewayUrl}/tickets`);
+  }
+
+  createTicket(data: any): Observable<any> {
+    return this.http.post(`${this.gatewayUrl}/tickets`, data);
+  }
+
+  updateTicket(id: string, data: any): Observable<any> {
+    return this.http.patch(`${this.gatewayUrl}/tickets/${id}`, data);
+  }
+
+  deleteTicket(id: string): Observable<any> {
+    return this.http.delete(`${this.gatewayUrl}/tickets/${id}`);
+  }
+
+  addComentario(ticketId: string, data: any): Observable<any> {
+    return this.http.post(`${this.gatewayUrl}/tickets/${ticketId}/comentarios`, data);
+  }
+
+  getUsuarios(): Observable<any> {
+    return this.http.get(`${this.gatewayUrl}/usuarios`);
+  }
+
+  getPerfil(id: string): Observable<any> {
+    return this.http.get(`${this.gatewayUrl}/usuarios/me/${id}`);
+  }
+
+  updatePerfil(id: string, data: any): Observable<any> {
+    return this.http.patch(`${this.gatewayUrl}/usuarios/${id}`, data);
+  }
+
+  deleteUsuario(id: string): Observable<any> {
+    return this.http.delete(`${this.gatewayUrl}/usuarios/${id}`);
+  }
+
+  getPermisos(): Observable<any> {
+    return this.http.get(`${this.gatewayUrl}/permisos`);
+  }
+
+  updatePermisos(usuarioId: string, permisosIds: string[]): Observable<any> {
+    return this.http.patch(`${this.gatewayUrl}/usuarios/${usuarioId}`, {
+      permisos_globales: permisosIds,
     });
   }
 
   getEstados(): Observable<any> {
-    return this.http.get(`${this.gatewayUrl}/estados`, { headers: this.getHeaders() });
+    return this.http.get(`${this.gatewayUrl}/estados`);
   }
 
   getPrioridades(): Observable<any> {
-    return this.http.get(`${this.gatewayUrl}/prioridades`, { headers: this.getHeaders() });
-  }
-
-  getPerfil(id: string): Observable<any> {
-    return this.http.get(`${this.gatewayUrl}/usuarios/me/${id}`, { headers: this.getHeaders() });
-  }
-
-  updatePerfil(id: string, data: any): Observable<any> {
-    return this.http.patch(`${this.gatewayUrl}/usuarios/${id}`, data, {
-      headers: this.getHeaders(),
-    });
-  }
-
-  deleteUsuario(id: string): Observable<any> {
-    return this.http.delete(`${this.gatewayUrl}/usuarios/${id}`, {
-      headers: new HttpHeaders({
-        Authorization: `Bearer ${this.getToken()}`,
-      }),
-    });
+    return this.http.get(`${this.gatewayUrl}/prioridades`);
   }
 }

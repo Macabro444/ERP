@@ -2,14 +2,18 @@ require('dotenv').config();
 const fastify = require('fastify')({ logger: false });
 const cors = require('@fastify/cors');
 const proxyRoutes = require('./routes/proxy');
+const { createClient } = require('@supabase/supabase-js');
 
 const PORT = process.env.PORT || 4000;
+
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 fastify.register(cors, {
   origin: '*',
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
 });
 
+// Rate limiting
 const requestCounts = {};
 fastify.addHook('onRequest', async (request, reply) => {
   const ip = request.ip;
@@ -31,6 +35,26 @@ fastify.addHook('onRequest', async (request, reply) => {
         });
       }
     }
+  }
+});
+
+// Logs centralizados
+fastify.addHook('onResponse', async (request, reply) => {
+  try {
+    const usuarioId = request.user?.id ?? null;
+    const ruta = '/' + request.url.split('/')[1];
+
+    await supabase.from('logs').insert({
+      servicio: 'api-gateway',
+      metodo: request.method,
+      ruta: ruta,
+      status_code: reply.statusCode,
+      usuario_id: usuarioId,
+      ip: request.ip,
+      duracion_ms: Math.round(reply.elapsedTime),
+    });
+  } catch (err) {
+    console.error('Error guardando log:', err);
   }
 });
 

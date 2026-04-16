@@ -3,8 +3,8 @@ import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
-import { provideHttpClient } from '@angular/common/http';
-
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { authInterceptor } from './interceptors/auth.interceptor';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -12,15 +12,13 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes),
+    provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimationsAsync(),
-    provideHttpClient(),
     providePrimeNG({ 
-        theme: {
-            preset: Aura,
-            options: {
-                darkModeSelector: false 
-            }
-        }
+      theme: {
+        preset: Aura,
+        options: { darkModeSelector: false }
+      }
     })
   ]
 };

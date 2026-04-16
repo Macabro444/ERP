@@ -74,6 +74,17 @@ async function proxyRoutes(fastify) {
     return reply.status(response.status).send(data);
   });
 
+  fastify.get('/grupos/usuario/:userId', { preHandler: authMiddleware }, async (request, reply) => {
+    const response = await fetch(
+      `${process.env.GROUPS_SERVICE_URL}/grupos/usuario/${request.params.userId}`,
+      {
+        headers: { Authorization: request.headers['authorization'] },
+      },
+    );
+    const data = await response.json();
+    return reply.status(response.status).send(data);
+  });
+
   fastify.patch('/grupos/:id', { preHandler: authMiddleware }, async (request, reply) => {
     const response = await fetch(`${process.env.GROUPS_SERVICE_URL}/grupos/${request.params.id}`, {
       method: 'PATCH',

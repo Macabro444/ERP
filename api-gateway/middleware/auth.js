@@ -11,6 +11,8 @@ const isPublicRoute = (method, url) => {
   return publicRoutes.some((r) => r.method === method && r.url === url);
 };
 
+const rutasLibres = ['GET /grupos/usuario', 'GET /usuarios/me'];
+
 const permisosRequeridos = {
   'POST /grupos': ['grupos.crear'],
   'PATCH /grupos': ['grupos.editar'],
@@ -75,9 +77,16 @@ const authMiddleware = async (request, reply) => {
     nombresPermisos = permisosData?.map((p) => p.nombre) ?? [];
   }
 
+  const parts = url.split('/').filter(Boolean);
+  const rutaCompleta = `${method} /${parts.slice(0, 2).join('/')}`;
+  if (rutasLibres.includes(rutaCompleta)) {
+    request.user = user;
+    request.nombresPermisos = nombresPermisos;
+    return;
+  }
+
   const baseUrl = '/' + url.split('/')[1];
   const key = `${method} ${baseUrl}`;
-
   const permisoRequerido = permisosRequeridos[key];
 
   if (permisoRequerido) {

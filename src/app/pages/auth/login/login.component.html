@@ -1,3 +1,4 @@
+<p-toast />
 <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center">
   <div
     style="
@@ -10,7 +11,9 @@
       border-radius: 12px;
     "
   >
-    <h2 style="text-align: center">Iniciar Sesión</h2>
+    <h2 style="text-align: center; cursor: pointer; user-select: none" (click)="onLogoClick()">
+      Iniciar Sesión
+    </h2>
 
     @if (errorMsg) {
       <p-message severity="error" [text]="errorMsg" />

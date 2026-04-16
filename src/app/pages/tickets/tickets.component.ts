@@ -194,7 +194,7 @@ export class TicketsComponent implements OnInit {
       return;
     }
 
-    const user = JSON.parse(localStorage.getItem('erp_user') || '{}');
+    const user = JSON.parse(sessionStorage.getItem('erp_user') || '{}');
 
     const ticketData = {
       titulo: this.nuevoTicket.titulo,

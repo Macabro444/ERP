@@ -6,7 +6,7 @@ export class PermissionsService {
 
   private cargarPermisos(): string[] {
     try {
-      const guardados = localStorage.getItem('erp_permisos');
+      const guardados = sessionStorage.getItem('erp_permisos');
       if (guardados) return JSON.parse(guardados);
       return [];
     } catch {
@@ -16,7 +16,7 @@ export class PermissionsService {
 
   setPermissionsFromArray(permisos: string[]): void {
     this.userPermissions.set(permisos);
-    localStorage.setItem('erp_permisos', JSON.stringify(permisos));
+    sessionStorage.setItem('erp_permisos', JSON.stringify(permisos));
   }
 
   setPermissions(tipo: 'admin' | 'cliente') {
@@ -56,8 +56,8 @@ export class PermissionsService {
 
   clearPermissions(): void {
     this.userPermissions.set([]);
-    localStorage.removeItem('erp_permisos');
-    localStorage.removeItem('erp_user');
+    sessionStorage.removeItem('erp_permisos');
+    sessionStorage.removeItem('erp_user');
   }
 
   removePermission(permiso: string) {
@@ -66,10 +66,14 @@ export class PermissionsService {
 
   getUserInfo(): any {
     try {
-      const user = localStorage.getItem('erp_user');
+      const user = sessionStorage.getItem('erp_user');
       return user ? JSON.parse(user) : null;
     } catch {
       return null;
     }
   }
+
+  getPermissions(): string[] {
+  return this.userPermissions();
+}
 }

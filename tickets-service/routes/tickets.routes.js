@@ -151,32 +151,88 @@ async function ticketsRoutes(fastify) {
   });
 
   fastify.patch('/tickets/:id', async (request, reply) => {
-    const { id } = request.params;
-    const { titulo, descripcion, estado_id, prioridad_id, asignado_id, fecha_final } = request.body;
+  const { id } = request.params;
+  const { titulo, descripcion, estado_id, prioridad_id, asignado_id, fecha_final } = request.body;
 
-    try {
-      const { data, error } = await supabase
-        .from('tickets')
-        .update({ titulo, descripcion, estado_id, prioridad_id, asignado_id, fecha_final })
-        .eq('id', id)
-        .select()
-        .single();
+  try {
+    
+    const { data: ticket, error: ticketError } = await supabase
+      .from('tickets')
+      .select('asignado_id, autor_id')
+      .eq('id', id)
+      .single();
 
-      if (error) throw error;
-
-      return reply.status(200).send({
-        statusCode: 200,
-        intOpCode: 'SxTK200',
-        data,
-      });
-    } catch (err) {
-      return reply.status(500).send({
-        statusCode: 500,
-        intOpCode: 'SxTK500',
-        data: { message: 'Error al editar ticket' },
+    if (ticketError || !ticket) {
+      return reply.status(404).send({
+        statusCode: 404,
+        intOpCode: 'SxTK404',
+        data: { message: 'Ticket no encontrado' }
       });
     }
-  });
+
+    
+    const authHeader = request.headers['authorization'];
+    const token = authHeader?.split(' ')[1];
+
+    if (token) {
+      const { createClient } = require('@supabase/supabase-js');
+      const supabaseAdmin = createClient(
+        process.env.SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_KEY
+      );
+
+      const { data: { user } } = await supabaseAdmin.auth.getUser(token);
+      
+      if (user) {
+        const { data: perfil } = await supabaseAdmin
+          .from('usuarios')
+          .select('permisos_globales')
+          .eq('id', user.id)
+          .single();
+
+        const permisosIds = perfil?.permisos_globales ?? [];
+        const { data: permisosData } = await supabaseAdmin
+          .from('permisos')
+          .select('nombre')
+          .in('id', permisosIds);
+        
+        const nombresPermisos = permisosData?.map(p => p.nombre) ?? [];
+        const esAdmin = nombresPermisos.includes('ticket.editar');
+        const esAsignado = ticket.asignado_id === user.id || ticket.autor_id === user.id;
+
+        
+        if (!esAdmin && !esAsignado) {
+          return reply.status(403).send({
+            statusCode: 403,
+            intOpCode: 'SxTK403',
+            data: { message: 'Solo puedes editar tickets asignados a ti' }
+          });
+        }
+      }
+    }
+
+    const { data, error } = await supabase
+      .from('tickets')
+      .update({ titulo, descripcion, estado_id, prioridad_id, asignado_id, fecha_final })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return reply.status(200).send({
+      statusCode: 200,
+      intOpCode: 'SxTK200',
+      data,
+    });
+  } catch (err) {
+    return reply.status(500).send({
+      statusCode: 500,
+      intOpCode: 'SxTK500',
+      data: { message: 'Error al editar ticket' },
+    });
+  }
+});
 
   fastify.delete('/tickets/:id', async (request, reply) => {
     const { id } = request.params;

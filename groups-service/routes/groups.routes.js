@@ -199,4 +199,28 @@ router.delete('/:id/miembros/:userId', async (req, res) => {
   }
 });
 
+router.get('/usuario/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const { data, error } = await supabase
+      .from('grupo_miembros')
+      .select('grupo:grupos(id, nombre)')
+      .eq('usuario_id', userId)
+      .limit(1)
+      .single();
+
+    return res.status(200).json({
+      statusCode: 200,
+      intOpCode: 'SxGR200',
+      data: data?.grupo ?? null,
+    });
+  } catch (err) {
+    return res.status(200).json({
+      statusCode: 200,
+      intOpCode: 'SxGR200',
+      data: null,
+    });
+  }
+});
+
 module.exports = router;

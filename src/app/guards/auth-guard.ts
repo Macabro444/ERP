@@ -7,12 +7,11 @@ export const authGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   const token = api.getToken();
-  const user = localStorage.getItem('erp_user');
+  const user = sessionStorage.getItem('erp_user');
 
   if (!token || !user) {
-  
-    localStorage.removeItem('erp_user');
-    localStorage.removeItem('erp_permisos');
+    sessionStorage.removeItem('erp_user');
+    sessionStorage.removeItem('erp_permisos');
     router.navigate(['/login']);
     return false;
   }

@@ -19,13 +19,10 @@ export class SidebarComponent {
   ) {}
 
   cerrarSesion() {
-
     this.api.clearToken();
     this.permissions.clearPermissions();
-    localStorage.removeItem('erp_user');
-    localStorage.removeItem('erp_permisos');
-    sessionStorage.clear();
-
+    sessionStorage.removeItem('erp_user');
+    sessionStorage.removeItem('erp_permisos');
     window.location.replace('/login');
   }
 }

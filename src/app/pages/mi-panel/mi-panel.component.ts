@@ -72,32 +72,33 @@ export class MiPanelComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    const user = JSON.parse(localStorage.getItem('erp_user') || '{}');
-    if (user.id) {
-      this.cliente = {
-        id: user.id,
-        nombre: user.nombre_completo ?? '',
-        usuario: user.username ?? '',
-        email: user.email ?? '',
-        departamento: '',
-      };
+    const user = JSON.parse(sessionStorage.getItem('erp_user') || '{}');
+    if (!user.id) return;
 
-      this.api.getPerfil(user.id).subscribe({
-        next: (res: any) => {
-          if (res.statusCode === 200) {
-            const u = res.data;
-            this.cliente = {
-              id: u.id,
-              nombre: u.nombre_completo ?? '',
-              usuario: u.username ?? '',
-              email: u.email ?? '',
-              departamento: '',
-            };
-            setTimeout(() => this.appRef.tick(), 50);
-          }
-        },
-      });
-    }
+    this.cliente.id = user.id;
+    this.cliente.nombre = user.nombre_completo ?? '';
+    this.cliente.usuario = user.username ?? '';
+    this.cliente.email = user.email ?? '';
+
+    this.api.getPerfil(user.id).subscribe({
+      next: (res: any) => {
+        if (res.statusCode === 200) {
+          const u = res.data;
+          this.cliente.id = u.id;
+          this.cliente.nombre = u.nombre_completo ?? '';
+          this.cliente.usuario = u.username ?? '';
+          this.cliente.email = u.email ?? '';
+        }
+      },
+    });
+
+    this.api.getGrupoUsuario(user.id).subscribe({
+      next: (res: any) => {
+        if (res.statusCode === 200 && res.data) {
+          this.cliente.departamento = res.data.nombre;
+        }
+      },
+    });
   }
 
   get misTickets(): Ticket[] {

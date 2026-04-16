@@ -105,7 +105,7 @@ export class TicketsService {
   }
 
   agregarComentario(ticketId: string, texto: string) {
-    const user = JSON.parse(localStorage.getItem('erp_user') || '{}');
+    const user = JSON.parse(sessionStorage.getItem('erp_user') || '{}');
     this.api
       .addComentario(ticketId, {
         contenido: texto,

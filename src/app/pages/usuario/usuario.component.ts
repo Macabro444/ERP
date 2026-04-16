@@ -68,7 +68,7 @@ export class UsuarioComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    const user = JSON.parse(localStorage.getItem('erp_user') || '{}');
+    const user = JSON.parse(sessionStorage.getItem('erp_user') || '{}');
     if (user.id) {
       this.api.getPerfil(user.id).subscribe({
         next: (res: any) => {
